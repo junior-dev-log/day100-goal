@@ -2,7 +2,7 @@
 <html lang="ko" data-theme="light">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>DAY100 GOAL</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
 <link rel="manifest" href="manifest.json">
@@ -128,7 +128,8 @@ button{cursor:pointer}
 .seg{display:grid;gap:4px;padding:3px;border-radius:10px;background:var(--sub)}
 .seg button{height:36px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:14px;font-weight:500}
 .seg button.on{background:var(--segOn);color:var(--ink);box-shadow:var(--shadow);font-weight:600}
-.search{display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-radius:10px;background:var(--sub);color:var(--muted)}
+.search{display:flex;align-items:center;gap:8px;height:42px;padding:0 8px 0 12px;border-radius:10px;background:var(--sub);color:var(--muted)}
+input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none}
 .search input{flex:1;min-width:0;width:100%;border:0;background:transparent;color:var(--ink);font-size:15px;outline:none}
 .blocks{display:flex;flex-direction:column;gap:28px}
 .block{display:flex;flex-direction:column;gap:8px}
@@ -173,7 +174,9 @@ button{cursor:pointer}
 .empty .ico{width:64px;height:64px;border-radius:18px;background:var(--sub);color:var(--muted);display:flex;align-items:center;justify-content:center}
 /* settings */
 .sgroup{display:flex;flex-direction:column;gap:12px}
-.slabel{font-size:13px;font-weight:600;color:var(--muted)}
+.slabel{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--muted)}
+.sgroup{padding-top:4px}
+.sgroup + .sgroup{margin-top:4px;padding-top:24px;border-top:1px solid var(--line)}
 .scard{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:14px;background:var(--sub)}
 .scard .seg{background:var(--bg);width:190px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .outline{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-weight:500}
@@ -186,7 +189,9 @@ button{cursor:pointer}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
-.authwrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:32px 24px}
+.modalback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:24px}
+.modalcard{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:var(--bg);box-shadow:var(--pop)}
+.authwrap{min-height:100vh;min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:32px 24px}
 .authlogo{display:flex;flex-direction:column;align-items:center;gap:10px}
 .authlogo .logo{display:flex;align-items:center;gap:8px}
 .authlogo .logo b{font-size:30px;font-weight:800;letter-spacing:-.03em}
@@ -242,7 +247,8 @@ const ICONS = {
   pencil:'<path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/>',
   settings:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>',
   dots:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
-  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>'
+  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r="0.9" fill="currentColor" stroke="none"/>'
 };
 const ic = (n, s) => '<svg width="' + (s || 20) + '" height="' + (s || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[n] + '</svg>';
 
@@ -275,7 +281,7 @@ const S = {
   inlineId: null, inlineForm: null, inlineErr: '', menuId: null, confirmDel: null, openKeys: {},
   calMonth: null, calSel: null, picker: null, pickerMonth: null,
   storeKind: 'db', localOnly: [], ready: false,
-  user: null, authMode: 'signin', authEmail: '', authPw: '', authErr: '', authBusy: false, importing: false
+  user: null, authMode: 'signin', authEmail: '', authPw: '', authErr: '', authBusy: false, importing: false, voiceInfoOpen: false
 };
 
 /* ---------- storage (per-user Firestore) ---------- */
@@ -304,8 +310,10 @@ function disconnectUser() { if (unsub) unsub(); unsub = null; store = null; S.se
 /* ---------- auth actions ---------- */
 async function authGoogle() {
   S.authErr = ''; S.authBusy = true; renderAuth();
-  try { await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider()); }
-  catch (e) { S.authErr = authMsg(e); S.authBusy = false; renderAuth(); }
+  try {
+    const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    if (result && result.additionalUserInfo && result.additionalUserInfo.isNewUser) toast('회원가입 완료! DAY100 GOAL에 오신 걸 환영해요');
+  } catch (e) { S.authErr = authMsg(e); S.authBusy = false; renderAuth(); }
 }
 async function authEmailSubmit() {
   const email = S.authEmail.trim(), pw = S.authPw;
@@ -313,7 +321,7 @@ async function authEmailSubmit() {
   if (pw.length < 6) { S.authErr = '비밀번호는 6자 이상이어야 해요'; renderAuth(); return; }
   S.authErr = ''; S.authBusy = true; renderAuth();
   try {
-    if (S.authMode === 'signup') await auth.createUserWithEmailAndPassword(email, pw);
+    if (S.authMode === 'signup') { await auth.createUserWithEmailAndPassword(email, pw); toast('회원가입 완료! DAY100 GOAL에 오신 걸 환영해요'); }
     else await auth.signInWithEmailAndPassword(email, pw);
   } catch (e) { S.authErr = authMsg(e); S.authBusy = false; renderAuth(); }
 }
@@ -324,7 +332,7 @@ function authMsg(e) {
   if (c === 'auth/invalid-email') return '이메일 형식을 확인해 주세요';
   if (c === 'auth/popup-closed-by-user') return '로그인 창이 닫혔어요. 다시 시도해 주세요';
   if (c === 'auth/weak-password') return '비밀번호는 6자 이상이어야 해요';
-  return '로그인하지 못했어요. 잠시 뒤 다시 시도해 주세요';
+  return '로그인하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
 }
 function authSignOut() { auth.signOut(); }
 
@@ -362,8 +370,8 @@ function speak(text) {
     const lang = prefs.accent === 'UK' ? 'en-GB' : 'en-US';
     u.lang = lang; u.rate = prefs.slow ? 0.7 : 1;
     const vs = ss.getVoices() || [];
-    const nl = v => String(v.lang || '').replace('_', '-');
-    const v = vs.find(x => nl(x) === lang) || vs.find(x => nl(x).indexOf('en') === 0);
+    const nl = v => String(v.lang || '').replace('_', '-').toLowerCase();
+    const v = vs.find(x => nl(x) === lang.toLowerCase()) || vs.find(x => nl(x).indexOf('en') === 0);
     if (v) u.voice = v;
     ss.speak(u);
   } catch (e) {}
@@ -423,7 +431,7 @@ function rowHTML(r, ctx, excludeId) {
     dupHTML(r, ctx, excludeId) +
     '<input class="inp" type="text" aria-label="뜻" placeholder="뜻" autocomplete="off" value="' + esc(r.meaning) + '" data-f="meaning" ' + a + '>' +
     (r.open ? '<div class="row" style="gap:4px"><input class="inp" style="font-size:15px;color:var(--text2)" type="text" aria-label="예문이나 메모" placeholder="예문이나 메모" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(r.memo) + '" data-f="memo" ' + a + '>' +
-      (speechOK ? '<button type="button" class="ib" style="color:var(--muted)" data-a="speakMemo" ' + a + ' aria-label="예문 발음 듣기">' + ic('speaker') + '</button>' : '') + '</div>' : '') +
+      (speechOK ? '<button type="button" class="ib" style="color:' + (r.memo.trim() ? 'var(--ink)' : 'var(--muted)') + '" data-a="speakMemo" ' + a + ' aria-label="예문 발음 듣기"' + (r.memo.trim() ? '' : ' disabled') + ' id="memospk-' + ctx + '-' + r.id + '">' + ic('speaker') + '</button>' : '') + '</div>' : '') +
     '<button type="button" class="toggle" data-a="toggleMemo" ' + a + ' aria-expanded="' + (r.open ? 'true' : 'false') + '">' +
       (r.open ? ic('chevUp', 15) + '<span>예문·메모 접기</span>' : ic('plus', 15) + '<span>예문·메모</span>') + '</button>' +
   '</div>';
@@ -466,7 +474,7 @@ function renderRecord() {
       '<div class="row between"><div class="logo"><b>DAY100</b><i>GOAL</i></div>' + themeBtn() + '</div>' +
       '<div class="col" style="gap:14px">' +
         '<div class="row between" style="align-items:flex-end"><div class="count"><b>' + D.count + '</b><span>/ 100번</span></div>' +
-        (D.dates[D.T] ? '<span class="pill">오늘 완료</span>' : '<span style="font-size:12px;font-weight:500;color:var(--muted)">오늘 공부를 기록해 보세요</span>') + '</div>' +
+        (D.dates[D.T] ? '<span class="pill">오늘 완료</span>' : '<span style="font-size:12px;font-weight:500;color:var(--muted)">오늘 공부를 기록해 보세요!</span>') + '</div>' +
         '<div class="grid" aria-label="100번 중 ' + D.count + '번 완료">' + cells + '</div>' +
         '<div class="stats"><span>오늘 단어<b>' + D.todayW + '</b></span><span>전체 단어<b>' + D.total + '</b></span></div>' +
         status + banner +
@@ -481,7 +489,7 @@ function renderRecord() {
         '<input class="inp" id="f-url" type="url" inputmode="url" placeholder="https://..." autocomplete="off" autocapitalize="off" value="' + esc(f.url) + '" data-f="url" data-ctx="f"></div>' +
     '</div>' +
     '<div class="col pad" style="gap:12px;padding-top:8px">' +
-      '<div class="row between" style="align-items:baseline"><span class="sec-title">외울 단어·표현</span><span style="font-size:12px;color:var(--muted)">새로 공부한 단어를 기록해 보세요</span></div>' +
+      '<div class="row between" style="align-items:baseline"><span class="sec-title">외울 단어·표현</span><span style="font-size:12px;color:var(--muted)">새로 공부한 단어를 기록해 보세요!</span></div>' +
       f.rows.map(r => rowHTML(r, 'f', null)).join('') +
       '<button type="button" class="addrow" data-a="addRow" data-ctx="f">' + ic('plus', 18) + '단어 추가</button>' +
     '</div>' +
@@ -507,7 +515,7 @@ function renderWords() {
   return wordsHead() +
     '<div class="col pad" style="gap:10px;padding-top:4px">' +
       '<div class="seg" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + mk('video', '콘텐츠별') + mk('abc', 'ABC순') + mk('cal', '달력') + '</div>' +
-      (S.mode !== 'cal' ? '<label class="search">' + ic('search', 17) + '<span class="sr">단어나 뜻으로 찾기</span><input type="search" placeholder="단어나 뜻으로 찾기" value="' + esc(S.q) + '" data-f="q" autocomplete="off" autocapitalize="off" spellcheck="false"></label>' : '') +
+      (S.mode !== 'cal' ? '<label class="search">' + ic('search', 17) + '<span class="sr">단어나 뜻으로 찾기</span><input type="search" placeholder="단어나 뜻으로 찾기" value="' + esc(S.q) + '" data-f="q" autocomplete="off" autocapitalize="off" spellcheck="false">' + '<button type="button" class="ib" id="searchClear" style="width:28px;height:28px;color:var(--ink);display:' + (S.q ? 'flex' : 'none') + '" data-a="clearSearch" aria-label="검색어 지우기">' + ic('x', 16) + '</button></label>' : '') +
     '</div>' +
     '<div id="list">' + listHTML() + '</div>';
 }
@@ -624,7 +632,7 @@ function listHTML() {
       '<button type="button" class="ib" data-a="calMonth" data-v="1" aria-label="다음 달">' + ic('chevRight') + '</button></div>' +
     '<div class="cal7" style="row-gap:4px">' + ['일','월','화','수','목','금','토'].map(w => '<span class="wd" style="font-size:12px;padding-bottom:6px">' + w + '</span>').join('') + cells + '</div>' +
     '<div class="divider"></div>' +
-    (selS.length ? '<div class="blocks">' + selS.map(s => blockHTML(s, s.words)).join('') + '</div>' : '<span style="font-size:14px;color:var(--muted);padding:4px 0 8px">이 날은 기록이 없어요</span>') +
+    (selS.length ? '<div class="blocks">' + selS.map(s => blockHTML(s, s.words)).join('') + '</div>' : '<span style="font-size:14px;color:var(--muted);padding:4px 0 8px">' + (sel > D.T ? '아직 오지 않은 날이에요. 그날 만나요!' : '이 날은 기록이 없어요.') + '</span>') +
   '</div>';
 }
 
@@ -633,11 +641,12 @@ function renderSettings() {
   const segBtn = (a, v, on, l) => '<button type="button" data-a="' + a + '" data-v="' + v + '" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '">' + l + '</button>';
   return '<div class="row pad top" style="min-height:56px"><span class="htitle">설정</span></div>' +
     '<div class="col pad" style="gap:28px">' +
-    (speechOK ? '<div class="sgroup"><span class="slabel">발음</span><div class="scard">' +
+    (speechOK ? '<div class="sgroup"><div class="row between" style="align-items:center"><span class="slabel">발음</span>' +
+'<button type="button" class="ibs" style="color:var(--muted)" data-a="voiceInfo" aria-label="발음 안내">' + ic('info', 18) + '</button></div><div class="scard">' +
       '<div class="row between" style="gap:12px"><span>억양</span><div class="seg">' + segBtn('accent', 'US', prefs.accent !== 'UK', '미국식') + segBtn('accent', 'UK', prefs.accent === 'UK', '영국식') + '</div></div>' +
       '<div class="row between" style="gap:12px"><span>속도</span><div class="seg">' + segBtn('slow', '0', !prefs.slow, '보통') + segBtn('slow', '1', prefs.slow, '천천히') + '</div></div>' +
       '<button type="button" class="outline" data-a="say" data-v="Nice to meet you. I finally figured it out.">' + ic('speaker', 16) + '이 설정으로 들어보기</button>' +
-      '</div><span style="font-size:13px;line-height:1.5;color:var(--muted)">단어 옆 스피커를 누르면 이 설정으로 읽어줘요. 목소리는 기기마다 조금씩 달라요.</span></div>' : '') +
+      '</div><span style="font-size:13px;color:var(--muted)">단어 옆 스피커가 이 설정으로 읽어드려요!</span></div>' : '') +
     '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span>테마</span><div class="seg">' +
       segBtn('setTheme', 'light', prefs.theme !== 'dark', '라이트') + segBtn('setTheme', 'dark', prefs.theme === 'dark', '다크') + '</div></div></div>' +
     '<div class="sgroup"><span class="slabel">기록 백업</span><div class="scard">' +
@@ -651,7 +660,15 @@ function renderSettings() {
     '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
     '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
     '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:4px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL</span><span style="font-size:12px;color:var(--muted)">100 &gt; 평생</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">빌드 2026-09-27</span></div>' +
+    (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
+      '<div class="modalcard" data-keep="modal" data-a="">' +
+      '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
+      '<button type="button" class="ib" style="margin:-8px -8px 0 0" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button></div>' +
+      '<span style="font-size:14px;line-height:1.6;color:var(--text2)">미국식·영국식 발음은 기기에 그 목소리가 설치돼 있어야 다르게 들려요.</span>' +
+      '<div style="font-size:13px;line-height:1.6;color:var(--text2)"><b style="color:var(--ink)">아이폰</b><br>설정 &gt; 손쉬운 사용 &gt; 읽기 및 말하기(또는 음성 콘텐츠) &gt; 음성 &gt; English에서 방언·목소리 받기</div>' +
+      '<div style="font-size:13px;line-height:1.6;color:var(--text2)"><b style="color:var(--ink)">안드로이드(갤럭시)</b><br>설정 &gt; 일반 &gt; 글자 읽어주기(TTS) &gt; 기본 엔진 설정에서 음성 데이터 내려받기</div>' +
+      '</div></div>' : '') +
     '</div>';
 }
 
@@ -710,7 +727,7 @@ async function saveNew() {
     S.form = blankForm(); S.picker = null; S.saving = false; render(); window.scrollTo(0, 0);
     toast('저장했어요 · 단어 ' + words.length + '개');
   } catch (e) {
-    S.saving = false; S.err = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요'; render();
+    S.saving = false; S.err = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; render();
   }
 }
 async function saveEdit() {
@@ -724,11 +741,11 @@ async function saveEdit() {
     await store.save(s);
     const i = S.sessions.findIndex(x => x.id === id); if (i >= 0) S.sessions[i] = s;
     S.inlineId = null; S.inlineForm = null; S.inlineErr = ''; S.picker = null; renderList(); toast('수정했어요');
-  } catch (e) { S.inlineErr = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요'; renderList(); }
+  } catch (e) { S.inlineErr = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; renderList(); }
 }
 async function delSession(id) {
   try { await store.remove(id); S.sessions = S.sessions.filter(x => x.id !== id); S.confirmDel = null; render(); toast('기록을 지웠어요'); }
-  catch (e) { toast('지우지 못했어요. 잠시 뒤 다시 시도해 주세요'); }
+  catch (e) { toast('지우지 못했어요. 잠시 뒤 다시 시도해 주세요.'); }
 }
 async function backup() {
   const list = S.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -770,6 +787,8 @@ document.addEventListener('click', e => {
     case 'authTab': S.authMode = v; S.authErr = ''; renderAuth(); break;
     case 'authSubmit': authEmailSubmit(); break;
     case 'signout': authSignOut(); break;
+    case 'voiceInfo': S.voiceInfoOpen = true; render(); break;
+    case 'closeVoiceInfo': S.voiceInfoOpen = false; render(); break;
     case 'picker': S.picker = S.picker === ctx ? null : ctx; S.pickerMonth = null; S.menuId = null; rerender(ctx); break;
     case 'pkMonth': { const f = formOf(S.picker); const base = S.pickerMonth || ((f && f.date) || today()).slice(0, 7); let y = +base.slice(0, 4), m = +base.slice(5, 7) + Number(v); if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.pickerMonth = y + '-' + pad(m); rerender(S.picker); break; }
     case 'pick': { if (v > today()) break; const f = formOf(ctx); if (f) f.date = v; S.picker = null; S.pickerMonth = null; rerender(ctx); break; }
@@ -792,6 +811,12 @@ document.addEventListener('click', e => {
     case 'openKey': S.openKeys[v] = !S.openKeys[v]; renderList(); break;
     case 'calMonth': { const all = Object.keys(D.dates).sort(); const base = S.calMonth || (all.length ? all[all.length - 1] : today()).slice(0, 7); let y = +base.slice(0, 4), m = +base.slice(5, 7) + Number(v); if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.calMonth = y + '-' + pad(m); S.menuId = null; renderList(); break; }
     case 'calPick': S.calSel = v; S.menuId = null; renderList(); break;
+    case 'clearSearch': {
+      S.q = ''; renderList();
+      const qi = document.querySelector('input[data-f="q"]'); if (qi) { qi.value = ''; qi.focus(); }
+      const cb = document.getElementById('searchClear'); if (cb) cb.style.display = 'none';
+      break;
+    }
   }
 });
 
@@ -803,13 +828,17 @@ document.addEventListener('input', e => {
   if (af === 'email') { S.authEmail = t.value; return; }
   if (af === 'pw') { S.authPw = t.value; return; }
   const f = t.dataset.f; if (!f) return;
-  if (f === 'q') { S.q = t.value; renderList(); return; }
+  if (f === 'q') { S.q = t.value; renderList(); const cb = document.getElementById('searchClear'); if (cb) cb.style.display = S.q ? 'flex' : 'none'; return; }
   const ctx = t.dataset.ctx, form = formOf(ctx); if (!form) return;
   if (f === 'title' || f === 'url') { form[f] = t.value; if (ctx === 'f' && S.err) { S.err = ''; } return; }
   const r = form.rows.find(x => x.id === t.dataset.row); if (!r) return;
   r[f] = t.value;
   if (f === 'term') {
     const b = document.getElementById('spk-' + ctx + '-' + r.id); if (b) b.disabled = !r.term.trim();
+  }
+  if (f === 'memo') {
+    const mb = document.getElementById('memospk-' + ctx + '-' + r.id);
+    if (mb) { const has = !!r.memo.trim(); mb.disabled = !has; mb.style.color = has ? 'var(--ink)' : 'var(--muted)'; }
     clearTimeout(dupTimers[r.id]);
     dupTimers[r.id] = setTimeout(() => { const box = document.getElementById('dup-' + ctx + '-' + r.id); if (box) box.outerHTML = dupHTML(r, ctx, ctx === 'i' ? S.inlineId : null); }, 250);
   }
@@ -820,13 +849,17 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && t.dataset && t.dataset.f === 'meaning' && !e.isComposing && e.keyCode !== 229) {
     e.preventDefault(); const ctx = t.dataset.ctx, form = formOf(ctx); const r = newRow(); form.rows.push(r); rerender(ctx); focusRow(ctx, r.id);
   }
-  if (e.key === 'Escape' && (S.picker || S.menuId)) { S.picker = null; S.menuId = null; render(); }
+  if (e.key === 'Escape' && (S.picker || S.menuId || S.voiceInfoOpen)) { S.picker = null; S.menuId = null; S.voiceInfoOpen = false; render(); }
 });
+
+document.addEventListener('gesturestart', e => e.preventDefault());
+let lastTouchEnd = 0;
+document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
 
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; connectUser(); }
-  else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; connectUser(); }
+  else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; S.authMode = 'signin'; }
   render();
 });
 })();

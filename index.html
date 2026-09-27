@@ -825,8 +825,8 @@ document.addEventListener('keydown', e => {
 
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; connectUser(); }
-  else { S.user = null; disconnectUser(); }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; connectUser(); }
+  else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; }
   render();
 });
 })();

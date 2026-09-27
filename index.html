@@ -666,7 +666,7 @@ function renderAuth() {
         '<div class="divider">또는</div>' +
         '<div class="authtabs">' + tabBtn('signin', '로그인') + tabBtn('signup', '회원가입') + '</div>' +
         '<input class="inp" type="email" placeholder="이메일" autocomplete="email" value="' + esc(S.authEmail) + '" data-af="email">' +
-        '<input class="inp" type="password" placeholder="비밀번호 (6자 이상)" autocomplete="' + (S.authMode === 'signup' ? 'new-password' : 'current-password') + '" value="' + esc(S.authPw) + '" data-af="pw">' +
+        '<input class="inp" type="password" placeholder="' + (S.authMode === 'signup' ? '비밀번호 (6자 이상)' : '비밀번호') + '" autocomplete="' + (S.authMode === 'signup' ? 'new-password' : 'current-password') + '" value="' + esc(S.authPw) + '" data-af="pw">' +
         (S.authErr ? '<span class="err">' + esc(S.authErr) + '</span>' : '') +
         '<button type="button" class="primary" style="height:50px" data-a="authSubmit"' + (S.authBusy ? ' disabled' : '') + '>' + (S.authMode === 'signup' ? '회원가입' : '로그인') + '</button>' +
       '</div>' +

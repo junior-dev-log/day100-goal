@@ -15,13 +15,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
-<link rel="manifest" href="/_blob/060bbedabbaf366026e1238f219491ae">
-<link rel="apple-touch-icon" href="/_blob/555e3a2f9a03084194242813019842c2">
-<link rel="icon" type="image/png" sizes="32x32" href="/_blob/373ab6d5aea45512f03f1c2344fde287">
-<meta name="theme-color" content="#111318">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="DAY100">
 <style>
 
 :root{
@@ -48,6 +41,7 @@
   --primaryBg:#F3F4F6; --primaryFg:#0B0C0F; --noticeBg:#151C2E; --noticeInk:#A9BEFF;
   --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --pop:0 12px 32px rgba(0,0,0,.5);
 }
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:45;pointer-events:none}
 html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-width:none;-ms-overflow-style:none;background:var(--bg)}
 html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
 *,*::before,*::after{box-sizing:inherit}
@@ -159,6 +153,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .atoggle{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:0;color:var(--ink);min-height:36px;text-align:left}
 .xn{font-size:12px;font-weight:700;color:var(--accent);background:var(--accentSoft);padding:3px 8px;border-radius:999px}
 .src{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-top:4px}
+.src span:first-child{flex-shrink:0;white-space:nowrap}
 .entries{display:flex;flex-direction:column;gap:12px;margin-top:10px;padding:14px;border-radius:12px;background:var(--sub)}
 .entry{display:flex;flex-direction:column;gap:4px}
 .entry + .entry{border-top:1px solid var(--line);padding-top:12px}
@@ -174,7 +169,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .empty .ico{width:64px;height:64px;border-radius:18px;background:var(--sub);color:var(--muted);display:flex;align-items:center;justify-content:center}
 /* settings */
 .sgroup{display:flex;flex-direction:column;gap:12px}
-.slabel{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--muted)}
+.slabel{font-size:17px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
 .sgroup{padding-top:4px}
 .sgroup + .sgroup{margin-top:4px;padding-top:24px;border-top:1px solid var(--line)}
 .scard{display:flex;flex-direction:column;gap:14px;padding:16px;border-radius:14px;background:var(--sub)}
@@ -229,7 +224,7 @@ const pad = n => (n < 10 ? '0' : '') + n;
 const dstr = off => { const d = new Date(); d.setDate(d.getDate() + (off || 0)); return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
 const today = () => dstr(0);
 const kor = d => { if (!d) return ''; const p = d.split('-'); return Number(p[1]) + '월 ' + Number(p[2]) + '일'; };
-const md = d => { if (!d) return ''; const p = d.split('-'); return p[1] + '.' + p[2]; };
+const md = d => { if (!d) return ''; const p = d.split('-'); return Number(p[1]) + '/' + Number(p[2]); };
 const nkey = s => String(s || '').toLowerCase().trim().replace(/\s+/g, ' ');
 let uidN = 0; const uid = () => Date.now().toString(36) + (++uidN).toString(36) + Math.random().toString(36).slice(2, 6);
 const safeUrl = u => /^https?:\/\//i.test(u || '') ? u : '';
@@ -646,21 +641,20 @@ function renderSettings() {
       '<div class="row between" style="gap:12px"><span>억양</span><div class="seg">' + segBtn('accent', 'US', prefs.accent !== 'UK', '미국식') + segBtn('accent', 'UK', prefs.accent === 'UK', '영국식') + '</div></div>' +
       '<div class="row between" style="gap:12px"><span>속도</span><div class="seg">' + segBtn('slow', '0', !prefs.slow, '보통') + segBtn('slow', '1', prefs.slow, '천천히') + '</div></div>' +
       '<button type="button" class="outline" data-a="say" data-v="Nice to meet you. I finally figured it out.">' + ic('speaker', 16) + '이 설정으로 들어보기</button>' +
-      '</div><span style="font-size:13px;color:var(--muted)">단어 옆 스피커가 이 설정으로 읽어드려요!</span></div>' : '') +
+      '</div><span style="font-size:13px;color:var(--muted)">영어 단어와 예문을 이 설정으로 읽어드려요!</span></div>' : '') +
     '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span>테마</span><div class="seg">' +
       segBtn('setTheme', 'light', prefs.theme !== 'dark', '라이트') + segBtn('setTheme', 'dark', prefs.theme === 'dark', '다크') + '</div></div></div>' +
     '<div class="sgroup"><span class="slabel">기록 백업</span><div class="scard">' +
-      '<span style="font-size:15px;line-height:1.55">지금까지 기록한 콘텐츠와 단어 전체를 파일 하나로 저장해요. 앱에 문제가 생겨도 이 파일로 기록을 되살릴 수 있어요.</span>' +
-      '<div class="row" style="gap:16px;font-size:13px;color:var(--text2)"><span>기록 ' + S.sessions.length + '개</span><span>단어 ' + D.total + '개</span></div>' +
+      '<span style="font-size:15px;line-height:1.55;word-break:keep-all">기록은 계정에 저장돼서 어느 기기에서든 똑같이 보여요. 혹시 모르니 파일로도 한 번 받아 두세요.</span>' +
+      '<div class="row" style="gap:16px;font-size:13px;color:var(--text2)"><span>콘텐츠 ' + S.sessions.length + '개</span><span>단어 ' + D.total + '개</span></div>' +
       '<button type="button" class="primary" style="height:48px;border-radius:12px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px" data-a="backup">' + ic('download', 18) + '백업 파일 받기</button>' +
-      '<span style="font-size:12px;color:var(--muted)">기록은 계정에 안전하게 보관되어 어느 기기에서 로그인해도 똑같이 보여요.</span>' +
-    '<label class="outline" style="cursor:pointer">' + ic('plus',16) + '백업 파일 가져오기<input type="file" accept="application/json" id="import-file" style="display:none">' + '</label>' +
+          '<label class="outline" style="cursor:pointer;height:48px;border-radius:12px">' + ic('plus',16) + '백업 파일 가져오기<input type="file" accept="application/json" id="import-file" style="display:none">' + '</label>' +
     (S.importing ? '<span style="font-size:13px;color:var(--muted)">가져오는 중…</span>' : '') +
     '</div></div>' +
     '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
     '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
     '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">빌드 2026-09-27</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.09.28</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -835,12 +829,12 @@ document.addEventListener('input', e => {
   r[f] = t.value;
   if (f === 'term') {
     const b = document.getElementById('spk-' + ctx + '-' + r.id); if (b) b.disabled = !r.term.trim();
+    clearTimeout(dupTimers[r.id]);
+    dupTimers[r.id] = setTimeout(() => { const box = document.getElementById('dup-' + ctx + '-' + r.id); if (box) box.outerHTML = dupHTML(r, ctx, ctx === 'i' ? S.inlineId : null); }, 250);
   }
   if (f === 'memo') {
     const mb = document.getElementById('memospk-' + ctx + '-' + r.id);
     if (mb) { const has = !!r.memo.trim(); mb.disabled = !has; mb.style.color = has ? 'var(--ink)' : 'var(--muted)'; }
-    clearTimeout(dupTimers[r.id]);
-    dupTimers[r.id] = setTimeout(() => { const box = document.getElementById('dup-' + ctx + '-' + r.id); if (box) box.outerHTML = dupHTML(r, ctx, ctx === 'i' ? S.inlineId : null); }, 250);
   }
 });
 document.addEventListener('keydown', e => {
@@ -856,12 +850,25 @@ document.addEventListener('gesturestart', e => e.preventDefault());
 let lastTouchEnd = 0;
 document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastTouchEnd <= 300) e.preventDefault(); lastTouchEnd = now; }, { passive: false });
 
+try { history.scrollRestoration = 'manual'; } catch (e) {}
+let scrollLockUntil = 0, userActed = false;
+['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { userActed = true; }, { passive: true, capture: true }));
+window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollLockUntil && window.scrollY > 0) window.scrollTo(0, 0); }, { passive: true });
+
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; connectUser(); }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
   else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; S.authMode = 'signin'; }
   render();
+  resetScroll();
 });
+
+/* 로그인·로그아웃으로 화면이 바뀌면 맨 위에서 시작. 직후 2초간은 사용자가 직접 만지기 전까지 밀려 내려가도 다시 맨 위로 */
+function resetScroll() {
+  userActed = false; scrollLockUntil = Date.now() + 2000;
+  const go = () => { if (userActed) return; window.scrollTo(0, 0); document.documentElement.scrollTop = 0; document.body.scrollTop = 0; };
+  go(); requestAnimationFrame(go); setTimeout(go, 200);
+}
 })();
 </script>
 </body>

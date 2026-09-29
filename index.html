@@ -149,7 +149,6 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .spk{margin-right:-8px}
 .letter{font-size:22px;font-weight:700;color:var(--accent);padding-top:12px}
 .aitem{display:flex;flex-direction:column;gap:2px;padding:12px 0}
-.aitem + .aitem{border-top:1px solid var(--line)}
 .atoggle{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:0;color:var(--ink);min-height:36px;text-align:left}
 .xn{font-size:12px;font-weight:700;color:var(--accent);background:var(--accentSoft);padding:3px 8px;border-radius:999px}
 .src{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-top:4px}
@@ -162,7 +161,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .calday button.has{background:var(--cellOn);color:var(--bg);font-weight:700}
 .calday button.t{color:var(--accent);font-weight:700}
 .calday button.has.t{color:var(--bg)}
-.calday button.sel{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+.calday button.t{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
 .divider{height:1px;background:var(--line);margin:6px 0 12px}
 .editor{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:14px;border:1.5px solid var(--ink)}
 .empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 32px 32px;text-align:center}
@@ -272,7 +271,7 @@ const fdb = firebase.firestore();
 const newRow = () => ({ id: uid(), term: '', meaning: '', memo: '', open: false });
 const blankForm = () => ({ date: today(), title: '', url: '', rows: [newRow()] });
 const S = {
-  sessions: [], tab: 'record', mode: 'video', q: '', form: blankForm(), err: '', saving: false,
+  sessions: [], tab: 'record', mode: 'video', q: '', sortBy: 'latest', sortOpen: false, form: blankForm(), err: '', saving: false,
   inlineId: null, inlineForm: null, inlineErr: '', menuId: null, confirmDel: null, openKeys: {},
   calMonth: null, calSel: null, picker: null, pickerMonth: null,
   storeKind: 'db', localOnly: [], ready: false,
@@ -374,6 +373,12 @@ function speak(text) {
 if (speechOK) { try { window.speechSynthesis.getVoices(); } catch (e) {} }
 
 /* ---------- toast ---------- */
+function scrollToBlock(id) {
+  requestAnimationFrame(() => {
+    const el = document.getElementById('block-' + id);
+    if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }); }
+  });
+}
 let toastT = null;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2600); }
 
@@ -510,7 +515,15 @@ function renderWords() {
   return wordsHead() +
     '<div class="col pad" style="gap:10px;padding-top:4px">' +
       '<div class="seg" style="grid-template-columns:repeat(3,minmax(0,1fr))">' + mk('video', '콘텐츠별') + mk('abc', 'ABC순') + mk('cal', '달력') + '</div>' +
-      (S.mode !== 'cal' ? '<label class="search">' + ic('search', 17) + '<span class="sr">단어나 뜻으로 찾기</span><input type="search" placeholder="단어나 뜻으로 찾기" value="' + esc(S.q) + '" data-f="q" autocomplete="off" autocapitalize="off" spellcheck="false">' + '<button type="button" class="ib" id="searchClear" style="width:28px;height:28px;color:var(--ink);display:' + (S.q ? 'flex' : 'none') + '" data-a="clearSearch" aria-label="검색어 지우기">' + ic('x', 16) + '</button></label>' : '') +
+      (S.mode !== 'cal' ? '<div class="row" style="gap:8px;align-items:center;position:relative" data-keep="sort">' +
+      '<label class="search" style="flex:1;min-width:0">' + ic('search', 17) + '<span class="sr">단어나 뜻으로 찾기</span><input type="search" placeholder="단어나 뜻으로 찾기" value="' + esc(S.q) + '" data-f="q" autocomplete="off" autocapitalize="off" spellcheck="false">' + '<button type="button" class="ib" id="searchClear" style="width:28px;height:28px;color:var(--ink);display:' + (S.q ? 'flex' : 'none') + '" data-a="clearSearch" aria-label="검색어 지우기">' + ic('x', 16) + '</button></label>' +
+      (S.mode === 'video' ? '<button type="button" class="ibs" style="width:42px;height:42px;flex-shrink:0;border-radius:10px;background:' + (S.sortOpen ? 'var(--segOn)' : 'var(--sub)') + ';color:var(--text2);box-shadow:' + (S.sortOpen ? 'var(--shadow)' : 'none') + '" data-a="toggleSort" aria-label="정렬 방식" aria-expanded="' + S.sortOpen + '"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12M6 12h8M6 16h4"/></svg></button>' +
+      (S.sortOpen ? '<div class="col" style="position:absolute;top:50px;right:0;background:var(--bg);border:1px solid var(--line);border-radius:12px;box-shadow:var(--pop);padding:6px;gap:2px;z-index:20;min-width:130px">' +
+      '<button type="button" data-a="setSort" data-v="latest" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "latest" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "latest" ? '700' : '400') + ';color:' + (S.sortBy === "latest" ? 'var(--ink)' : 'var(--text2)') + '">최신순</button>' +
+      '<button type="button" data-a="setSort" data-v="oldest" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "oldest" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "oldest" ? '700' : '400') + ';color:' + (S.sortBy === "oldest" ? 'var(--ink)' : 'var(--text2)') + '">오래된순</button>' +
+      '<button type="button" data-a="setSort" data-v="alpha" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "alpha" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "alpha" ? '700' : '400') + ';color:' + (S.sortBy === "alpha" ? 'var(--ink)' : 'var(--text2)') + '">알파벳순</button>' +
+      '</div>' : '') : '') +
+      '</div>' : '') +
     '</div>' +
     '<div id="list">' + listHTML() + '</div>';
 }
@@ -520,7 +533,7 @@ function blockHTML(s, ws) {
   const link = safeUrl(s.url);
   const title = link ? '<a class="btitle" href="' + esc(link) + '" target="_blank" rel="noopener">' + esc(s.title) + '</a>' : '<span class="btitle">' + esc(s.title) + '</span>';
   const menuOpen = S.menuId === s.id;
-  let h = '<div class="block">' +
+  let h = '<div class="block" id="block-' + s.id + '">' +
     '<div class="row between" style="align-items:flex-start;gap:8px">' +
       '<div class="col" style="gap:3px;min-width:0;padding-top:6px">' + title +
         '<div class="tags"><span class="tag">' + ic('cal', 12) + esc(kor(s.date)) + '</span><span class="tag blue">단어 ' + s.words.length + '개</span></div></div>' +
@@ -547,7 +560,7 @@ function blockHTML(s, ws) {
 }
 function editorHTML(s) {
   const f = S.inlineForm;
-  return '<div class="editor">' +
+  return '<div class="editor" id="block-' + s.id + '">' +
     '<span style="font-size:13px;font-weight:700;color:var(--muted)">기록 수정</span>' +
     '<div class="col" style="gap:6px"><div class="row between" style="gap:8px;min-height:34px"><label class="lbl" style="font-size:12px" for="i-title">콘텐츠 제목</label>' + chipHTML('i', f.date) + '</div>' +
       '<input class="inp" id="i-title" type="text" placeholder="영상, 글, 책 제목" value="' + esc(f.title) + '" data-f="title" data-ctx="i"></div>' +
@@ -563,7 +576,7 @@ function editorHTML(s) {
 function listHTML() {
   const q = S.q.trim().toLowerCase();
   if (S.mode === 'video') {
-    const sorted = S.sessions.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0));
+    const sorted = S.sessions.slice().sort((a, b) => S.sortBy === 'oldest' ? (a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0)) : S.sortBy === 'alpha' ? (a.title || '').localeCompare(b.title || '', 'en', { sensitivity: 'base' }) : (b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0)));
     let h = '';
     sorted.forEach(s => {
       const ws = s.words.filter(w => match(w, q));
@@ -654,7 +667,7 @@ function renderSettings() {
     '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
     '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
     '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.09.28</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.09.29</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -734,7 +747,7 @@ async function saveEdit() {
   try {
     await store.save(s);
     const i = S.sessions.findIndex(x => x.id === id); if (i >= 0) S.sessions[i] = s;
-    S.inlineId = null; S.inlineForm = null; S.inlineErr = ''; S.picker = null; renderList(); toast('수정했어요');
+    S.inlineId = null; S.inlineForm = null; S.inlineErr = ''; S.picker = null; renderList(); toast('수정했어요'); scrollToBlock(id);
   } catch (e) { S.inlineErr = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; renderList(); }
 }
 async function delSession(id) {
@@ -767,6 +780,10 @@ document.addEventListener('click', e => {
     S.menuId = null;
     if (!el) { document.querySelectorAll('.menu').forEach(x => x.remove()); return; }
   }
+  if (S.sortOpen && !e.target.closest('[data-keep="sort"]')) {
+    S.sortOpen = false; render();
+    if (!el) return;
+  }
   if (!el) return;
   const a = el.dataset.a, v = el.dataset.v, ctx = el.dataset.ctx, rid = el.dataset.row, id = el.dataset.id;
   switch (a) {
@@ -797,7 +814,7 @@ document.addEventListener('click', e => {
     case 'edit': { const s = S.sessions.find(x => x.id === id); if (!s) break; S.menuId = null; S.confirmDel = null; S.picker = null;
       const rows = s.words.map(w => ({ id: w.id, term: w.term, meaning: w.meaning, memo: w.memo, open: !!w.memo }));
       S.inlineId = id; S.inlineForm = { date: s.date, title: s.title, url: s.url, rows: rows.length ? rows : [newRow()] }; S.inlineErr = ''; renderList(); break; }
-    case 'cancelEdit': S.inlineId = null; S.inlineForm = null; S.inlineErr = ''; S.picker = null; renderList(); break;
+    case 'cancelEdit': { const eid = S.inlineId; S.inlineId = null; S.inlineForm = null; S.inlineErr = ''; S.picker = null; renderList(); scrollToBlock(eid); break; }
     case 'saveEdit': saveEdit(); break;
     case 'askDel': S.menuId = null; S.confirmDel = id; S.inlineId = null; S.inlineForm = null; renderList(); break;
     case 'cancelDel': S.confirmDel = null; renderList(); break;
@@ -805,6 +822,8 @@ document.addEventListener('click', e => {
     case 'openKey': S.openKeys[v] = !S.openKeys[v]; renderList(); break;
     case 'calMonth': { const all = Object.keys(D.dates).sort(); const base = S.calMonth || (all.length ? all[all.length - 1] : today()).slice(0, 7); let y = +base.slice(0, 4), m = +base.slice(5, 7) + Number(v); if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.calMonth = y + '-' + pad(m); S.menuId = null; renderList(); break; }
     case 'calPick': S.calSel = v; S.menuId = null; renderList(); break;
+    case 'toggleSort': S.sortOpen = !S.sortOpen; render(); break;
+    case 'setSort': S.sortBy = v; S.sortOpen = false; render(); break;
     case 'clearSearch': {
       S.q = ''; renderList();
       const qi = document.querySelector('input[data-f="q"]'); if (qi) { qi.value = ''; qi.focus(); }
@@ -843,7 +862,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Enter' && t.dataset && t.dataset.f === 'meaning' && !e.isComposing && e.keyCode !== 229) {
     e.preventDefault(); const ctx = t.dataset.ctx, form = formOf(ctx); const r = newRow(); form.rows.push(r); rerender(ctx); focusRow(ctx, r.id);
   }
-  if (e.key === 'Escape' && (S.picker || S.menuId || S.voiceInfoOpen)) { S.picker = null; S.menuId = null; S.voiceInfoOpen = false; render(); }
+  if (e.key === 'Escape' && (S.picker || S.menuId || S.voiceInfoOpen || S.sortOpen)) { S.picker = null; S.menuId = null; S.voiceInfoOpen = false; S.sortOpen = false; render(); }
 });
 
 document.addEventListener('gesturestart', e => e.preventDefault());
@@ -857,7 +876,7 @@ window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollL
 
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; S.mode = 'video'; S.q = ''; S.sortBy = 'latest'; S.sortOpen = false; S.openKeys = {}; S.calSel = null; S.calMonth = null; S.menuId = null; S.confirmDel = null; S.inlineId = null; S.inlineForm = null; S.picker = null; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
   else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; S.authMode = 'signin'; }
   render();
   resetScroll();

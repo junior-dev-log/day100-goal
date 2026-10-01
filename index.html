@@ -159,9 +159,8 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .calday{display:flex;align-items:center;justify-content:center;height:44px}
 .calday button{width:36px;height:36px;border-radius:999px;border:0;padding:0;background:transparent;color:var(--muted);font-size:14px}
 .calday button.has{background:var(--cellOn);color:var(--bg);font-weight:700}
-.calday button.t{color:var(--accent);font-weight:700}
-.calday button.has.t{color:var(--bg)}
-.calday button.t{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--accent)}
+.calday button.t:not(.has){background:var(--accentSoft);color:var(--accent);font-weight:700}
+.calday button.sel{outline:3px solid var(--accent);outline-offset:1px}
 .divider{height:1px;background:var(--line);margin:6px 0 12px}
 .editor{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:14px;border:1.5px solid var(--ink)}
 .empty{display:flex;flex-direction:column;align-items:center;gap:12px;padding:40px 32px 32px;text-align:center}
@@ -667,7 +666,7 @@ function renderSettings() {
     '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
     '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
     '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.09.29</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.01</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +

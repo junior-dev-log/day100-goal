@@ -270,7 +270,7 @@ const fdb = firebase.firestore();
 const newRow = () => ({ id: uid(), term: '', meaning: '', memo: '', open: false });
 const blankForm = () => ({ date: today(), title: '', url: '', rows: [newRow()] });
 const S = {
-  sessions: [], tab: 'record', mode: 'video', q: '', sortBy: 'latest', sortOpen: false, abcShuffle: false, shuffleSeed: 1, form: blankForm(), err: '', saving: false,
+  sessions: [], tab: 'record', mode: 'video', q: '', sortBy: 'latest', sortOpen: false, abcShuffle: false, shuffleSeed: 1, logoutAsk: false, form: blankForm(), err: '', saving: false,
   inlineId: null, inlineForm: null, inlineErr: '', menuId: null, confirmDel: null, openKeys: {},
   calMonth: null, calSel: null, picker: null, pickerMonth: null,
   storeKind: 'db', localOnly: [], ready: false,
@@ -660,23 +660,29 @@ function renderSettings() {
     '<div class="col pad" style="gap:28px">' +
     (speechOK ? '<div class="sgroup"><div class="row between" style="align-items:center"><span class="slabel">발음</span>' +
 '<button type="button" class="ibs" style="color:var(--muted)" data-a="voiceInfo" aria-label="발음 안내">' + ic('info', 18) + '</button></div><div class="scard">' +
-      '<div class="row between" style="gap:12px"><span>억양</span><div class="seg">' + segBtn('accent', 'US', prefs.accent !== 'UK', '미국식') + segBtn('accent', 'UK', prefs.accent === 'UK', '영국식') + '</div></div>' +
-      '<div class="row between" style="gap:12px"><span>속도</span><div class="seg">' + segBtn('slow', '0', !prefs.slow, '보통') + segBtn('slow', '1', prefs.slow, '천천히') + '</div></div>' +
+      '<div class="row between" style="gap:12px"><span style="font-size:14px;color:var(--ink)">억양</span><div class="seg">' + segBtn('accent', 'US', prefs.accent !== 'UK', '미국식') + segBtn('accent', 'UK', prefs.accent === 'UK', '영국식') + '</div></div>' +
+      '<div class="row between" style="gap:12px"><span style="font-size:14px;color:var(--ink)">속도</span><div class="seg">' + segBtn('slow', '0', !prefs.slow, '보통') + segBtn('slow', '1', prefs.slow, '천천히') + '</div></div>' +
       '<button type="button" class="outline" data-a="say" data-v="Nice to meet you. I finally figured it out.">' + ic('speaker', 16) + '이 설정으로 들어보기</button>' +
       '</div><span style="font-size:13px;color:var(--muted)">영어 단어와 예문을 이 설정으로 읽어드려요!</span></div>' : '') +
-    '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span>테마</span><div class="seg">' +
+    '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span style="font-size:14px;color:var(--ink)">테마</span><div class="seg">' +
       segBtn('setTheme', 'light', prefs.theme !== 'dark', '라이트') + segBtn('setTheme', 'dark', prefs.theme === 'dark', '다크') + '</div></div></div>' +
     '<div class="sgroup"><span class="slabel">기록 백업</span><div class="scard">' +
-      '<span style="font-size:15px;line-height:1.55;word-break:keep-all">기록은 계정에 저장돼서 어느 기기에서든 똑같이 보여요. 혹시 모르니 파일로도 한 번 받아 두세요.</span>' +
+      '<span style="font-size:14px;line-height:1.55;word-break:keep-all;color:var(--ink)">기록은 계정에 저장돼서 어느 기기에서든 똑같이 보여요. 혹시 모르니 파일로도 한 번 받아 두세요.</span>' +
       '<div class="row" style="gap:16px;font-size:13px;color:var(--text2)"><span>콘텐츠 ' + S.sessions.length + '개</span><span>단어 ' + D.total + '개</span></div>' +
       '<button type="button" class="primary" style="height:48px;border-radius:12px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px" data-a="backup">' + ic('download', 18) + '백업 파일 받기</button>' +
           '<label class="outline" style="cursor:pointer;height:48px;border-radius:12px">' + ic('plus',16) + '백업 파일 가져오기<input type="file" accept="application/json" id="import-file" style="display:none">' + '</label>' +
     (S.importing ? '<span style="font-size:13px;color:var(--muted)">가져오는 중…</span>' : '') +
     '</div></div>' +
-    '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
-    '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
-    '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.04</span></div>' +
+    '<div class="sgroup"><span class="slabel">계정</span>' +
+    (S.logoutAsk
+      ? '<div class="scard" style="gap:12px"><span style="font-size:14px;color:var(--ink)">로그아웃할까요?</span><div style="display:flex;gap:8px;justify-content:flex-end">' +
+        '<button type="button" class="btn2" data-a="cancelSignout">취소</button>' +
+        '<button type="button" class="btn2" style="border:0;background:var(--ink);color:var(--bg);font-weight:700" data-a="signout">로그아웃</button></div></div>'
+      : '<div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
+        '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
+        '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
+    '</div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.04.2</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -796,7 +802,7 @@ document.addEventListener('click', e => {
   if (!el) return;
   const a = el.dataset.a, v = el.dataset.v, ctx = el.dataset.ctx, rid = el.dataset.row, id = el.dataset.id;
   switch (a) {
-    case 'tab': S.tab = v; S.picker = null; S.menuId = null; render(); window.scrollTo(0, 0); break;
+    case 'tab': S.tab = v; S.picker = null; S.menuId = null; S.logoutAsk = false; render(); window.scrollTo(0, 0); break;
     case 'theme': prefs.theme = prefs.theme === 'dark' ? 'light' : 'dark'; savePrefs(); applyTheme(); render(); break;
     case 'setTheme': prefs.theme = v; savePrefs(); applyTheme(); render(); break;
     case 'accent': prefs.accent = v; savePrefs(); render(); break;
@@ -806,6 +812,8 @@ document.addEventListener('click', e => {
     case 'authGoogle': authGoogle(); break;
     case 'authTab': S.authMode = v; S.authErr = ''; renderAuth(); break;
     case 'authSubmit': authEmailSubmit(); break;
+    case 'askSignout': S.logoutAsk = true; render(); break;
+    case 'cancelSignout': S.logoutAsk = false; render(); break;
     case 'signout': authSignOut(); break;
     case 'voiceInfo': S.voiceInfoOpen = true; render(); break;
     case 'closeVoiceInfo': S.voiceInfoOpen = false; render(); break;
@@ -887,7 +895,7 @@ window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollL
 
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; S.mode = 'video'; S.q = ''; S.sortBy = 'latest'; S.sortOpen = false; S.abcShuffle = false; S.openKeys = {}; S.calSel = null; S.calMonth = null; S.menuId = null; S.confirmDel = null; S.inlineId = null; S.inlineForm = null; S.picker = null; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; S.mode = 'video'; S.q = ''; S.sortBy = 'latest'; S.sortOpen = false; S.abcShuffle = false; S.logoutAsk = false; S.openKeys = {}; S.calSel = null; S.calMonth = null; S.menuId = null; S.confirmDel = null; S.inlineId = null; S.inlineForm = null; S.picker = null; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
   else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; S.authMode = 'signin'; }
   render();
   resetScroll();

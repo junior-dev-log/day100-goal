@@ -147,8 +147,8 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .wmean{font-size:15px;color:var(--text2)}
 .wmemo{font-size:14px;color:var(--muted)}
 .spk{margin-right:-8px}
-.letter{font-size:22px;font-weight:700;color:var(--accent);padding-top:12px}
-.aitem{display:flex;flex-direction:column;gap:2px;padding:12px 0}
+.letter{font-size:22px;font-weight:700;color:var(--accent);padding-top:12px;padding-left:6px}
+.aitem{display:flex;flex-direction:column;gap:2px;padding:12px 0 12px 6px}
 .atoggle{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:0;color:var(--ink);min-height:36px;text-align:left}
 .xn{font-size:12px;font-weight:700;color:var(--accent);background:var(--accentSoft);padding:3px 8px;border-radius:999px}
 .src{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-top:4px}
@@ -270,7 +270,7 @@ const fdb = firebase.firestore();
 const newRow = () => ({ id: uid(), term: '', meaning: '', memo: '', open: false });
 const blankForm = () => ({ date: today(), title: '', url: '', rows: [newRow()] });
 const S = {
-  sessions: [], tab: 'record', mode: 'video', q: '', sortBy: 'latest', sortOpen: false, form: blankForm(), err: '', saving: false,
+  sessions: [], tab: 'record', mode: 'video', q: '', sortBy: 'latest', sortOpen: false, abcShuffle: false, shuffleSeed: 1, form: blankForm(), err: '', saving: false,
   inlineId: null, inlineForm: null, inlineErr: '', menuId: null, confirmDel: null, openKeys: {},
   calMonth: null, calSel: null, picker: null, pickerMonth: null,
   storeKind: 'db', localOnly: [], ready: false,
@@ -522,6 +522,7 @@ function renderWords() {
       '<button type="button" data-a="setSort" data-v="oldest" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "oldest" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "oldest" ? '700' : '400') + ';color:' + (S.sortBy === "oldest" ? 'var(--ink)' : 'var(--text2)') + '">오래된순</button>' +
       '<button type="button" data-a="setSort" data-v="alpha" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "alpha" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "alpha" ? '700' : '400') + ';color:' + (S.sortBy === "alpha" ? 'var(--ink)' : 'var(--text2)') + '">알파벳순</button>' +
       '</div>' : '') : '') +
+      (S.mode === 'abc' ? '<button type="button" class="ibs" style="width:42px;height:42px;flex-shrink:0;border-radius:10px;background:' + (S.abcShuffle ? 'var(--segOn)' : 'var(--sub)') + ';color:var(--text2)" data-a="reshuffle" aria-label="섞기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></button>' : '') +
       '</div>' : '') +
     '</div>' +
     '<div id="list">' + listHTML() + '</div>';
@@ -572,6 +573,12 @@ function editorHTML(s) {
       '<button type="button" class="primary" style="height:48px;border-radius:12px;font-size:15px" data-a="saveEdit">수정 저장</button></div>' +
   '</div>';
 }
+function shuffledKeys(keys, seed) {
+  const a = keys.slice(); let t = seed | 0;
+  const rnd = () => { t = (t + 0x6D2B79F5) | 0; let r = Math.imul(t ^ (t >>> 15), t | 1); r ^= r + Math.imul(r ^ (r >>> 7), r | 61); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; };
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); const x = a[i]; a[i] = a[j]; a[j] = x; }
+  return a;
+}
 function listHTML() {
   const q = S.q.trim().toLowerCase();
   if (S.mode === 'video') {
@@ -586,7 +593,8 @@ function listHTML() {
     return '<div class="blocks pad" style="padding-top:4px">' + h + '</div>';
   }
   if (S.mode === 'abc') {
-    const keys = Object.keys(D.byKey).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    const shuf = !!S.abcShuffle;
+    const keys = shuf ? shuffledKeys(Object.keys(D.byKey), S.shuffleSeed) : Object.keys(D.byKey).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
     let h = '', cur = null, items = '';
     const flush = () => { if (cur !== null) h += '<div class="letter">' + esc(cur) + '</div><div class="col">' + items + '</div>'; items = ''; };
     let shown = 0;
@@ -596,7 +604,7 @@ function listHTML() {
       shown++;
       const first = all[0].w.term.trim()[0] || '';
       const L = /[a-z]/i.test(first) ? first.toUpperCase() : '#';
-      if (L !== cur) { flush(); cur = L; }
+      if (!shuf && L !== cur) { flush(); cur = L; }
       const latest = all.find(x => x.w.meaning) || all[0];
       const n = all.length, open = n > 1 && !!S.openKeys[k];
       let it = '<div class="aitem"><div class="row between" style="gap:8px">';
@@ -613,10 +621,12 @@ function listHTML() {
       }
       items += it + '</div>';
     });
-    flush();
+    if (shuf) h = '<div class="col">' + items + '</div>'; else flush();
     if (!shown) return q ? '<div class="pad" style="padding-top:40px;text-align:center;font-size:15px;color:var(--muted)">‘' + esc(S.q) + '’에 맞는 단어가 없어요</div>' : '<div class="pad" style="padding-top:24px;font-size:15px;color:var(--muted)">등록한 단어가 없어요</div>';
     const distinct = Object.keys(D.byKey).length;
-    return '<div class="col pad"><div class="row between" style="align-items:baseline;padding-bottom:4px"><span style="font-size:14px;color:var(--text2)">서로 다른 단어 <b style="color:var(--ink)">' + distinct + '</b>개</span><span style="font-size:13px;color:var(--muted)">등록 ' + D.total + '개</span></div>' + h + '</div>';
+    return '<div class="col pad"><div class="row between" style="height:20px;margin-top:8px;margin-bottom:4px;padding-left:6px"><span style="font-size:14px;color:var(--text2)">서로 다른 단어 <b style="color:var(--ink)">' + distinct + '</b>개</span>' +
+      (shuf ? '<button type="button" data-a="exitShuffle" style="position:relative;z-index:1;box-sizing:border-box;display:flex;align-items:center;gap:2px;min-height:36px;padding:8px 0 8px 10px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--accent)">알파벳순으로<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>' : '') +
+      '</div>' + h + '</div>';
   }
   // 달력
   const all = Object.keys(D.dates).sort();
@@ -666,7 +676,7 @@ function renderSettings() {
     '<div class="sgroup"><span class="slabel">계정</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
     '<span style="font-size:14px;color:var(--text2)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
     '<button type="button" class="btn2" data-a="signout">로그아웃</button></div></div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.01</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.04</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -822,6 +832,8 @@ document.addEventListener('click', e => {
     case 'calMonth': { const all = Object.keys(D.dates).sort(); const base = S.calMonth || (all.length ? all[all.length - 1] : today()).slice(0, 7); let y = +base.slice(0, 4), m = +base.slice(5, 7) + Number(v); if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.calMonth = y + '-' + pad(m); S.menuId = null; renderList(); break; }
     case 'calPick': S.calSel = v; S.menuId = null; renderList(); break;
     case 'toggleSort': S.sortOpen = !S.sortOpen; render(); break;
+    case 'reshuffle': S.abcShuffle = true; S.shuffleSeed = Math.floor(Math.random() * 1e9) + 1; render(); break;
+    case 'exitShuffle': S.abcShuffle = false; render(); break;
     case 'setSort': S.sortBy = v; S.sortOpen = false; render(); break;
     case 'clearSearch': {
       S.q = ''; renderList();
@@ -875,7 +887,7 @@ window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollL
 
 render();
 auth.onAuthStateChanged(u => {
-  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; S.mode = 'video'; S.q = ''; S.sortBy = 'latest'; S.sortOpen = false; S.openKeys = {}; S.calSel = null; S.calMonth = null; S.menuId = null; S.confirmDel = null; S.inlineId = null; S.inlineForm = null; S.picker = null; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
+  if (u) { S.user = u; S.authBusy = false; S.authErr = ''; S.tab = 'record'; S.mode = 'video'; S.q = ''; S.sortBy = 'latest'; S.sortOpen = false; S.abcShuffle = false; S.openKeys = {}; S.calSel = null; S.calMonth = null; S.menuId = null; S.confirmDel = null; S.inlineId = null; S.inlineForm = null; S.picker = null; if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); connectUser(); }
   else { S.user = null; disconnectUser(); S.authBusy = false; S.authErr = ''; S.authMode = 'signin'; }
   render();
   resetScroll();

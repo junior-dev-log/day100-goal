@@ -184,6 +184,22 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .modalback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:24px}
 .modalcard{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:var(--bg);box-shadow:var(--pop)}
+.dlback{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(17,19,24,.45);animation:dlDimIn .24s ease-out}
+.dlsheet{width:100%;max-width:440px;margin:0 auto;box-sizing:border-box;display:flex;flex-direction:column;padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;background:var(--bg);color:var(--ink);animation:dlUp .34s cubic-bezier(.32,.72,0,1)}
+.dlback.closing{animation:dlDimOut .22s ease-in forwards}
+.dlback.closing .dlsheet{animation:dlDown .22s ease-in forwards}
+.dlhandle{align-self:center;width:40px;height:5px;border-radius:3px;background:var(--line);margin-bottom:14px}
+.dlopt{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:64px;padding:0 4px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);text-align:left;font-family:inherit;cursor:pointer}
+.dlopt.last{border-bottom:0}
+.dlradio{flex:none;box-sizing:border-box;width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:flex;align-items:center;justify-content:center}
+.dlradio span{width:12px;height:12px;border-radius:50%;background:transparent}
+.dlopt.on .dlradio{border-color:var(--accent)}
+.dlopt.on .dlradio span{background:var(--accent)}
+@keyframes dlUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes dlDown{from{transform:translateY(0)}to{transform:translateY(100%)}}
+@keyframes dlDimIn{from{opacity:0}to{opacity:1}}
+@keyframes dlDimOut{from{opacity:1}to{opacity:0}}
+@media (prefers-reduced-motion: reduce){.dlback,.dlsheet,.dlback.closing,.dlback.closing .dlsheet{animation:none}}
 .authwrap{min-height:100vh;min-height:100dvh;box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:28px;padding:32px 24px}
 .authlogo{display:flex;flex-direction:column;align-items:center;gap:10px}
 .authlogo .logo{display:flex;align-items:center;gap:8px}
@@ -274,7 +290,7 @@ const S = {
   inlineId: null, inlineForm: null, inlineErr: '', menuId: null, confirmDel: null, openKeys: {},
   calMonth: null, calSel: null, picker: null, pickerMonth: null,
   storeKind: 'db', localOnly: [], ready: false,
-  user: null, authMode: 'signin', authEmail: '', authPw: '', authErr: '', authBusy: false, importing: false, voiceInfoOpen: false
+  user: null, authMode: 'signin', authEmail: '', authPw: '', authErr: '', authBusy: false, importing: false, voiceInfoOpen: false, pdfBusy: null, dlSort: 'latest'
 };
 
 /* ---------- storage (per-user Firestore) ---------- */
@@ -432,7 +448,7 @@ function rowHTML(r, ctx, excludeId) {
     (r.open ? '<div class="row" style="gap:4px"><input class="inp" style="font-size:15px;color:var(--text2)" type="text" aria-label="예문이나 메모" placeholder="예문이나 메모" autocomplete="off" autocapitalize="off" spellcheck="false" value="' + esc(r.memo) + '" data-f="memo" ' + a + '>' +
       (speechOK ? '<button type="button" class="ib" style="color:' + (r.memo.trim() ? 'var(--ink)' : 'var(--muted)') + '" data-a="speakMemo" ' + a + ' aria-label="예문 발음 듣기"' + (r.memo.trim() ? '' : ' disabled') + ' id="memospk-' + ctx + '-' + r.id + '">' + ic('speaker') + '</button>' : '') + '</div>' : '') +
     '<button type="button" class="toggle" data-a="toggleMemo" ' + a + ' aria-expanded="' + (r.open ? 'true' : 'false') + '">' +
-      (r.open ? ic('chevUp', 15) + '<span>예문·메모 접기</span>' : ic('plus', 15) + '<span>예문·메모</span>') + '</button>' +
+      (r.open ? ic('chevUp', 15) + '<span>예문·메모 접기</span>' : r.memo.trim() ? ic('chevDown', 15) + '<span>예문·메모 펼치기</span>' : ic('plus', 15) + '<span>예문·메모</span>') + '</button>' +
   '</div>';
 }
 function pickerHTML(ctx, curDate) {
@@ -489,7 +505,7 @@ function renderRecord() {
     '</div>' +
     '<div class="col pad" style="gap:12px;padding-top:8px">' +
       '<div class="row between" style="align-items:baseline"><span class="sec-title">외울 단어·표현</span><span style="font-size:12px;color:var(--muted)">새로 공부한 단어를 기록해 보세요!</span></div>' +
-      f.rows.map(r => rowHTML(r, 'f', null)).join('') +
+      f.rows.map(r => rowHTML(r, 'f', S.savingId || null)).join('') +
       '<button type="button" class="addrow" data-a="addRow" data-ctx="f">' + ic('plus', 18) + '단어 추가</button>' +
     '</div>' +
     '<div class="col pad" style="gap:10px;padding-top:8px">' +
@@ -666,11 +682,19 @@ function renderSettings() {
       '</div><span style="font-size:13px;color:var(--muted)">영어 단어와 예문을 이 설정으로 읽어드려요!</span></div>' : '') +
     '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span style="font-size:14px;color:var(--ink)">테마</span><div class="seg">' +
       segBtn('setTheme', 'light', prefs.theme !== 'dark', '라이트') + segBtn('setTheme', 'dark', prefs.theme === 'dark', '다크') + '</div></div></div>' +
+    '<div class="sgroup"><span class="slabel">단어장 내려받기</span><div class="scard">' +
+      '<span style="font-size:14px;line-height:1.55;word-break:keep-all;color:var(--ink)">단어장을 보이는 순서 그대로 PDF로 받아요.</span>' +
+      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">' +
+      '<button type="button" class="outline" style="height:48px;border-radius:12px;white-space:nowrap" data-a="dlOpen"' + (S.pdfBusy ? ' disabled' : '') + '>' + (S.pdfBusy === 'video' ? '만드는 중…' : ic('download', 16) + '콘텐츠별') + '</button>' +
+      '<button type="button" class="outline" style="height:48px;border-radius:12px;white-space:nowrap" data-a="dlAbc"' + (S.pdfBusy ? ' disabled' : '') + '>' + (S.pdfBusy === 'abc' ? '만드는 중…' : ic('download', 16) + 'ABC순') + '</button>' +
+      '</div></div></div>' +
     '<div class="sgroup"><span class="slabel">기록 백업</span><div class="scard">' +
       '<span style="font-size:14px;line-height:1.55;word-break:keep-all;color:var(--ink)">기록은 계정에 저장돼서 어느 기기에서든 똑같이 보여요. 혹시 모르니 파일로도 한 번 받아 두세요.</span>' +
-      '<div class="row" style="gap:16px;font-size:13px;color:var(--text2)"><span>콘텐츠 ' + S.sessions.length + '개</span><span>단어 ' + D.total + '개</span></div>' +
-      '<button type="button" class="primary" style="height:48px;border-radius:12px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px" data-a="backup">' + ic('download', 18) + '백업 파일 받기</button>' +
-          '<label class="outline" style="cursor:pointer;height:48px;border-radius:12px">' + ic('plus',16) + '백업 파일 가져오기<input type="file" accept="application/json" id="import-file" style="display:none">' + '</label>' +
+      '<div class="row" style="gap:16px;margin-top:-2px;margin-bottom:2px;font-size:13px;color:var(--text2)"><span>콘텐츠 ' + S.sessions.length + '개</span><span>단어 ' + D.total + '개</span></div>' +
+      '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">' +
+      '<button type="button" class="primary" style="height:48px;border-radius:12px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap" data-a="backup">' + ic('download', 18) + '백업 받기</button>' +
+          '<label class="outline" style="cursor:pointer;height:48px;border-radius:12px;white-space:nowrap">' + ic('plus',16) + '백업 가져오기<input type="file" accept="application/json" id="import-file" style="display:none">' + '</label>' +
+      '</div>' +
     (S.importing ? '<span style="font-size:13px;color:var(--muted)">가져오는 중…</span>' : '') +
     '</div></div>' +
     '<div class="sgroup"><span class="slabel">계정</span>' +
@@ -682,7 +706,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.04.2</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.11</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -742,14 +766,14 @@ async function saveNew() {
   if (url && !safeUrl(url)) { S.err = '링크는 https:// 로 시작해야 해요'; render(); const u = $('#f-url'); if (u) u.focus(); return; }
   const words = wordsFrom(f.rows);
   const s = { id: uid(), date: f.date || today(), title, url, words, createdAt: Date.now() };
-  S.saving = true; S.err = ''; render();
+  S.saving = true; S.savingId = s.id; S.err = ''; render();
   try {
     await store.save(s);
     if (store.kind === 'db' && !S.sessions.some(x => x.id === s.id)) S.sessions.push(s);
-    S.form = blankForm(); S.picker = null; S.saving = false; render(); window.scrollTo(0, 0);
+    S.form = blankForm(); S.picker = null; S.saving = false; S.savingId = null; render(); window.scrollTo(0, 0);
     toast('저장했어요 · 단어 ' + words.length + '개');
   } catch (e) {
-    S.saving = false; S.err = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; render();
+    S.saving = false; S.savingId = null; S.err = '저장하지 못했어요. 잠시 뒤 다시 눌러 주세요.'; render();
   }
 }
 async function saveEdit() {
@@ -784,6 +808,269 @@ async function backup() {
   } catch (e) { toast('백업 파일을 만들지 못했어요'); }
 }
 
+/* ---------- 단어장 PDF 내려받기 (기록을 읽기만 함) ---------- */
+const DL_SORTS = [['latest', '최신순', '최근에 공부한 콘텐츠부터'], ['oldest', '오래된순', '처음 공부한 콘텐츠부터'], ['alpha', '알파벳순', '콘텐츠 제목 A → Z']];
+function dlOptHTML(o, last) {
+  const on = S.dlSort === o[0];
+  return '<button type="button" class="dlopt' + (last ? ' last' : '') + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-a="dlPick" data-v="' + o[0] + '">' +
+    '<span class="col" style="gap:3px"><span style="font-size:16px;font-weight:600">' + o[1] + '</span><span style="font-size:13px;color:var(--muted)">' + o[2] + '</span></span>' +
+    '<span class="dlradio" aria-hidden="true"><span></span></span></button>';
+}
+function dlOpenSheet() {
+  if (S.pdfBusy || document.getElementById('dlsheet')) return;
+  S.dlSort = 'latest';
+  const w = document.createElement('div');
+  w.id = 'dlsheet'; w.className = 'dlback'; w.setAttribute('data-a', 'dlClose');
+  w.innerHTML = '<div class="dlsheet" role="dialog" aria-modal="true" aria-label="콘텐츠별 PDF 받기" data-a="">' +
+    '<span class="dlhandle" aria-hidden="true"></span>' +
+    '<div class="row between" style="align-items:flex-start;gap:8px;margin-bottom:6px"><span class="col" style="gap:4px"><span style="font-size:19px;font-weight:700;letter-spacing:-.01em">콘텐츠별 PDF 받기</span><span style="font-size:14px;color:var(--text2)">어떤 순서로 받을까요?</span></span>' +
+    '<button type="button" class="ib" style="margin:-6px -10px 0 0;color:var(--muted)" data-a="dlClose" aria-label="닫기">' + ic('x', 20) + '</button></div>' +
+    '<div role="radiogroup" aria-label="순서">' + DL_SORTS.map((o, i) => dlOptHTML(o, i === DL_SORTS.length - 1)).join('') + '</div>' +
+    '<button type="button" class="primary" id="dlgo" style="margin-top:16px;display:flex;align-items:center;justify-content:center;gap:6px" data-a="dlGo">' + ic('download', 18) + 'PDF 받기</button>' +
+    '</div>';
+  document.body.appendChild(w);
+}
+function dlCloseSheet() {
+  const w = document.getElementById('dlsheet'); if (!w || w.classList.contains('closing')) return;
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduce) { w.remove(); return; }
+  w.classList.add('closing'); setTimeout(() => w.remove(), 220);
+}
+function dlPick(v) {
+  S.dlSort = v;
+  document.querySelectorAll('#dlsheet .dlopt').forEach(b => { const on = b.dataset.v === v; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+}
+function dlSetBusy(kind) {
+  S.pdfBusy = kind;
+  const go = document.getElementById('dlgo');
+  if (go) { go.disabled = !!kind; go.innerHTML = kind ? 'PDF 만드는 중…' : ic('download', 18) + 'PDF 받기'; }
+  if (S.tab === 'settings') render();
+}
+async function makePdf(kind) {
+  if (S.pdfBusy) return;
+  const sort = S.dlSort || 'latest';
+  dlSetBusy(kind);
+  await new Promise(r => setTimeout(r, 40));
+  try {
+    const bytes = await buildWordsPdf(kind, sort);
+    const label = kind === 'abc' ? 'ABC순' : '콘텐츠별·' + DL_SORTS.find(o => o[0] === sort)[1];
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'DAY100 단어장 (' + label + ') ' + today() + '.pdf';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    dlSetBusy(null); dlCloseSheet();
+  } catch (e) { dlSetBusy(null); toast('PDF를 만들지 못했어요'); }
+}
+
+/* PDF 그리기: A4(794×1123) 한 장씩 캔버스에 그려 이미지로 담음 */
+async function buildWordsPdf(kind, sort) {
+  const d = derive();
+  const PW = 794, PH = 1123, M = 56, TOP = 56, BOT = PH - 72, SC = 1.6;
+  const C = { ink: '#111318', t2: '#454B57', mu: '#6B7280', mu2: '#9AA1AD', sub: '#F4F5F7', line: '#E5E7EB', acc: '#2B59E0', accS: '#EEF2FD', bar: '#C7D4F7', sep: '#F0F1F3' };
+  const FF = (getComputedStyle(document.documentElement).getPropertyValue('--font') || '').trim() || "'Apple SD Gothic Neo',system-ui,sans-serif";
+  if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
+  const mc = document.createElement('canvas').getContext('2d');
+  const font = (w, s) => w + ' ' + s + 'px ' + FF;
+  const tw = (t, f) => { mc.font = f; return mc.measureText(t).width; };
+  function wrap(text, f, maxW) {
+    text = String(text || ''); if (!text) return [''];
+    mc.font = f; const out = []; let line = '';
+    const pushLong = word => { let cur = ''; for (const ch of word) { if (mc.measureText(cur + ch).width > maxW && cur) { out.push(cur); cur = ch; } else cur += ch; } return cur; };
+    text.split(/(\s+)/).forEach(tok => {
+      if (!tok) return;
+      if (/^\s+$/.test(tok)) { if (line) line += ' '; return; }
+      if (mc.measureText(line + tok).width <= maxW) { line += tok; return; }
+      if (line.trim()) { out.push(line.trim()); line = ''; }
+      if (mc.measureText(tok).width > maxW) line = pushLong(tok); else line = tok;
+    });
+    if (line.trim() || !out.length) out.push(line.trim());
+    return out;
+  }
+  const pages = []; let ops = null;
+  const newPage = () => { ops = []; pages.push(ops); };
+  const rr = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h); g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath(); };
+  const text = (t, x, y, f, col, align) => ops.push(g => { g.font = f; g.fillStyle = col; g.textAlign = align || 'left'; g.textBaseline = 'middle'; g.fillText(t, x, y); });
+  const box = (x, y, w, h, r, fill, stroke, lw) => ops.push(g => { rr(g, x, y, w, h, r); if (fill) { g.fillStyle = fill; g.fill(); } if (stroke) { g.strokeStyle = stroke; g.lineWidth = lw || 1; g.stroke(); } });
+  const rect = (x, y, w, h, col) => ops.push(g => { g.fillStyle = col; g.fillRect(x, y, w, h); });
+  const pill = (t, x, cy, f, col, bg, px, h, r) => { const w = tw(t, f) + px * 2; box(x, cy - h / 2, w, h, r, bg); text(t, x + px, cy, f, col); return w; };
+  const ymd = d.T.replace(/-/g, '.');
+  function header(title, suffix) {
+    newPage();
+    let y = TOP;
+    text('DAY100', M, y + 9, font(800, 15), C.ink);
+    const bw = tw('DAY100', font(800, 15));
+    const gw = pill('GOAL', M + bw + 6, y + 9, font(700, 9), C.acc, C.accS, 6, 16, 4);
+    text('100 > 평생', M + bw + 6 + gw + 10, y + 9, font(400, 11), C.mu);
+    y += 18 + 8;
+    text(title, M, y + 16, font(700, 26), C.ink);
+    if (suffix) text(suffix, M + tw(title, font(700, 26)) + 6, y + 18, font(600, 15), C.mu);
+    text(ymd + ' 받음', PW - M, y + 8, font(400, 11), C.mu, 'right');
+    text('콘텐츠 ' + S.sessions.length + '개 · 단어 ' + d.total + '개', PW - M, y + 24, font(400, 11), C.mu, 'right');
+    y += 32 + 16;
+    rect(M, y, PW - 2 * M, 2, C.ink);
+    return y + 2;
+  }
+
+  if (kind !== 'abc') {
+    const sorted = S.sessions.slice().sort((a, b) => sort === 'oldest' ? (a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0)) : sort === 'alpha' ? (a.title || '').localeCompare(b.title || '', 'en', { sensitivity: 'base' }) : (b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0)));
+    let y = header('단어장 · 콘텐츠별', '(' + DL_SORTS.find(o => o[0] === sort)[1] + ')') + 20;
+    const BX = M, BW = PW - 2 * M, IX = BX + 20 + 17, IW = BW - 40 - 17;
+    const fT = font(700, 16), fW = font(600, 15), fM = font(400, 13), fE = font(400, 12);
+    const itemOf = w => {
+      const nth = d.nthOf[w.id] || 0;
+      const ml = wrap(w.meaning || '뜻 없음', fM, IW), el = w.memo ? wrap(w.memo, fE, IW) : [];
+      const termW = IW - (nth > 1 ? 70 : 0); const tl = wrap(w.term, fW, termW);
+      const h = 9 + tl.length * 20 + 3 + ml.length * 18 + (el.length ? 3 + el.length * 17 : 0) + 9;
+      return { h, draw: (top) => {
+        let yy = top + 9;
+        tl.forEach((l, i) => { text(l, IX, yy + 10, fW, C.ink); if (i === tl.length - 1 && nth > 1) pill(nth + '번째', IX + tw(l, fW) + 8, yy + 10, font(600, 10), C.acc, C.accS, 7, 18, 9); yy += 20; });
+        yy += 3; ml.forEach(l => { text(l, IX, yy + 9, fM, C.t2); yy += 18; });
+        if (el.length) { yy += 3; el.forEach(l => { text(l, IX, yy + 8.5, fE, C.mu); yy += 17; }); }
+      } };
+    };
+    sorted.forEach(s => {
+      const items = s.words.length ? s.words.map(itemOf) : [{ h: 36, draw: top => text('등록한 단어가 없어요', IX, top + 18, fM, C.mu) }];
+      let idx = 0, cont = false;
+      while (idx < items.length) {
+        const tl = wrap(s.title + (cont ? ' (이어서)' : ''), fT, BW - 40);
+        const headH = 18 + tl.length * 22 + (cont ? 8 : 8 + 20 + 8);
+        if (y + headH + items[idx].h + 18 > BOT && y > TOP + 1) { newPage(); y = TOP; }
+        const segTop = y; let yy = y + headH; const segItems = [];
+        while (idx < items.length && (yy + items[idx].h + 18 <= BOT || !segItems.length)) { segItems.push([items[idx], yy]); yy += items[idx].h; idx++; }
+        const segH = yy + 18 - segTop;
+        box(BX + 0.5, segTop + 0.5, BW - 1, segH - 1, 14, null, C.line, 1);
+        let hy = segTop + 18;
+        tl.forEach(l => { text(l, BX + 20, hy + 11, fT, C.ink); hy += 22; });
+        if (!cont) {
+          hy += 8;
+          const dw = pill(s.date.replace(/-/g, '.'), BX + 20, hy + 10, font(500, 11), C.t2, C.sub, 8, 20, 6);
+          pill('단어 ' + s.words.length + '개', BX + 20 + dw + 6, hy + 10, font(600, 11), C.acc, C.accS, 8, 20, 6);
+        }
+        const barTop = segTop + headH, barH = yy - barTop;
+        rect(BX + 20, barTop, 3, barH, C.bar);
+        segItems.forEach(([it, top]) => it.draw(top));
+        y = segTop + segH + 20; cont = true;
+      }
+    });
+  } else {
+    const keys = Object.keys(d.byKey).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
+    const COLW = (PW - 2 * M - 32) / 2, TW = COLW - 4;
+    const fW = font(600, 15), fM = font(400, 13), fE = font(400, 12), fSd = font(700, 10.5), fSt = font(400, 10.5);
+    const srcOf = (s, w) => { const dw = tw(md(s.date), fSd) + 6; const lines = wrap(s.title, fSt, w - dw); return { dw, lines, h: lines.length * 15 }; };
+    const units = []; let cur = null;
+    keys.forEach(k => {
+      const all = d.byKey[k].slice().reverse();
+      const first = all[0].w.term.trim()[0] || '';
+      const L = /[a-z]/i.test(first) ? first.toUpperCase() : '#';
+      if (L !== cur) { cur = L; units.push({ letter: L, h: 30 }); }
+      const n = all.length, termL = wrap(all[0].w.term, fW, TW - (n > 1 ? 44 : 0));
+      if (n === 1) {
+        const x = all[0], ml = wrap(x.w.meaning || '뜻 없음', fM, TW), el = x.w.memo ? wrap(x.w.memo, fE, TW) : [], sr = srcOf(x.s, TW);
+        const h = 9 + termL.length * 20 + 3 + ml.length * 18 + (el.length ? 3 + el.length * 17 : 0) + 4 + sr.h + 9 + 1;
+        units.push({ h, draw: (x0, top) => {
+          let yy = top + 9; termL.forEach(l => { text(l, x0 + 4, yy + 10, fW, C.ink); yy += 20; });
+          yy += 3; ml.forEach(l => { text(l, x0 + 4, yy + 9, fM, C.t2); yy += 18; });
+          if (el.length) { yy += 3; el.forEach(l => { text(l, x0 + 4, yy + 8.5, fE, C.mu); yy += 17; }); }
+          yy += 4; text(md(x.s.date), x0 + 4, yy + 7.5, fSd, C.mu); sr.lines.forEach(l => { text(l, x0 + 4 + sr.dw, yy + 7.5, fSt, C.mu); yy += 15; });
+          rect(x0, top + h - 1, COLW, 1, C.sep);
+        } });
+      } else {
+        const EW = TW - 24;
+        const ents = all.map(x => { const ml = wrap(x.w.meaning || '뜻 없음', fM, EW), el = x.w.memo ? wrap(x.w.memo, fE, EW) : [], sr = srcOf(x.s, EW); return { x, ml, el, sr, h: ml.length * 18 + (el.length ? 2 + el.length * 17 : 0) + 3 + sr.h }; });
+        const termH = termL.length * 20;
+        const segH = (list, last) => 9 + termH + 7 + 20 + list.reduce((a, e) => a + e.h, 0) + (list.length - 1) * 17 + 9 + (last ? 1 : 0);
+        const drawSeg = (x0, top, list, cont, last) => {
+          const h = segH(list, last), bh = 20 + list.reduce((a, e) => a + e.h, 0) + (list.length - 1) * 17;
+          let yy = top + 9;
+          termL.forEach((l, i) => { text(l, x0 + 4, yy + 10, fW, C.ink); if (i === termL.length - 1) { if (cont) text('(이어서)', x0 + 4 + tw(l, fW) + 8, yy + 10, font(600, 12), C.mu); else pill('×' + n, x0 + 4 + tw(l, fW) + 8, yy + 10, font(700, 10), C.acc, C.accS, 7, 18, 9); } yy += 20; });
+          yy += 7; box(x0 + 4, yy, COLW - 4, bh, 10, C.sub);
+          let ey = yy + 10;
+          list.forEach((e, i) => {
+            if (i) { rect(x0 + 16, ey + 8, COLW - 28, 1, C.line); ey += 17; }
+            const ex = x0 + 16;
+            e.ml.forEach(l => { text(l, ex, ey + 9, fM, C.t2); ey += 18; });
+            if (e.el.length) { ey += 2; e.el.forEach(l => { text(l, ex, ey + 8.5, fE, C.mu); ey += 17; }); }
+            ey += 3; text(md(e.x.s.date), ex, ey + 7.5, fSd, C.mu); e.sr.lines.forEach(l => { text(l, ex + e.sr.dw, ey + 7.5, fSt, C.mu); ey += 15; });
+          });
+          if (last) rect(x0, top + h - 1, COLW, 1, C.sep);
+          return h;
+        };
+        units.push({ h: segH(ents, true), minH: segH(ents.slice(0, 1), ents.length === 1), ents, segH, drawSeg });
+      }
+    });
+    let colTop = header('단어장 · ABC순', '') + 14;
+    text('서로 다른 단어 ', M + 4, colTop + 9, font(400, 12), C.t2);
+    text(String(keys.length), M + 4 + tw('서로 다른 단어 ', font(400, 12)), colTop + 9, font(700, 12), C.ink);
+    text('개', M + 4 + tw('서로 다른 단어 ', font(400, 12)) + tw(String(keys.length), font(700, 12)), colTop + 9, font(400, 12), C.t2);
+    colTop += 18 + 14;
+    if (!keys.length) text('등록한 단어가 없어요', M + 4, colTop + 10, font(400, 13), C.mu);
+    let col = 0, y = colTop;
+    const nextCol = () => { if (col === 0) { col = 1; y = colTop; } else { newPage(); colTop = TOP; col = 0; y = TOP; } };
+    for (let i = 0; i < units.length; i++) {
+      const u = units[i], nx = units[i + 1];
+      const need = u.letter && nx ? u.h + (nx.minH || nx.h) : (u.minH || u.h);
+      if (y + need > BOT && y > colTop) nextCol();
+      let x0 = M + col * (COLW + 32);
+      if (u.letter) { text(u.letter, x0 + 4, y + 6 + 11, font(700, 18), C.acc); y += u.h; continue; }
+      if (!u.ents) { u.draw(x0, y); y += u.h; continue; }
+      /* 여러 콘텐츠 단어: 칸에 다 안 들어가면 음영 박스를 나눠서 다음 칸에 (이어서) */
+      let rest = u.ents, cont = false;
+      while (rest.length) {
+        let k = rest.length;
+        while (k > 1 && y + u.segH(rest.slice(0, k), k === rest.length) > BOT) k--;
+        if (y + u.segH(rest.slice(0, k), k === rest.length) > BOT && y > colTop) { nextCol(); x0 = M + col * (COLW + 32); continue; }
+        y += u.drawSeg(x0, y, rest.slice(0, k), cont, k === rest.length);
+        rest = rest.slice(k); cont = true;
+        if (rest.length) { nextCol(); x0 = M + col * (COLW + 32); }
+      }
+    }
+  }
+
+  /* 쪽 번호 넣고 이미지로 */
+  const cv = document.createElement('canvas'); cv.width = PW * SC; cv.height = PH * SC;
+  const g = cv.getContext('2d');
+  const jpgs = [];
+  for (let p = 0; p < pages.length; p++) {
+    g.setTransform(1, 0, 0, 1, 0, 0); g.fillStyle = '#FFFFFF'; g.fillRect(0, 0, cv.width, cv.height);
+    g.setTransform(SC, 0, 0, SC, 0, 0);
+    pages[p].forEach(fn => fn(g));
+    g.font = font(400, 10); g.fillStyle = C.mu2; g.textBaseline = 'middle';
+    g.textAlign = 'left'; g.fillText('DAY100 GOAL', M, PH - 32);
+    g.textAlign = 'right'; g.fillText((p + 1) + ' / ' + pages.length, PW - M, PH - 32);
+    const url = cv.toDataURL('image/jpeg', 0.8);
+    const bin = atob(url.slice(url.indexOf(',') + 1)); const u8 = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    jpgs.push(u8);
+    if (p % 4 === 3) await new Promise(r => setTimeout(r, 0));
+  }
+  return pdfFromJpegs(jpgs, cv.width, cv.height);
+}
+function pdfFromJpegs(jpgs, iw, ih) {
+  const enc = new TextEncoder(); const parts = []; const offs = []; let len = 0;
+  const add = x => { const b = typeof x === 'string' ? enc.encode(x) : x; parts.push(b); len += b.length; };
+  const W = 595.28, H = 841.89, n = jpgs.length;
+  add('%PDF-1.4\n%\xE2\xE3\xCF\xD3\n');
+  const obj = (i, body) => { offs[i] = len; add(i + ' 0 obj\n'); body(); add('\nendobj\n'); };
+  obj(1, () => add('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2, () => add('<< /Type /Pages /Count ' + n + ' /Kids [' + jpgs.map((_, i) => (3 + i * 3) + ' 0 R').join(' ') + '] >>'));
+  jpgs.forEach((j, i) => {
+    const pg = 3 + i * 3, im = pg + 1, ct = pg + 2;
+    const cs = 'q ' + W + ' 0 0 ' + H + ' 0 0 cm /Im0 Do Q';
+    obj(pg, () => add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + W + ' ' + H + '] /Resources << /XObject << /Im0 ' + im + ' 0 R >> >> /Contents ' + ct + ' 0 R >>'));
+    obj(im, () => { add('<< /Type /XObject /Subtype /Image /Width ' + iw + ' /Height ' + ih + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + j.length + ' >>\nstream\n'); add(j); add('\nendstream'); });
+    obj(ct, () => add('<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream'));
+  });
+  const total = 3 + n * 3, xref = len;
+  let x = 'xref\n0 ' + total + '\n0000000000 65535 f \n';
+  for (let i = 1; i < total; i++) x += String(offs[i]).padStart(10, '0') + ' 00000 n \n';
+  add(x + 'trailer\n<< /Size ' + total + ' /Root 1 0 R >>\nstartxref\n' + xref + '\n%%EOF');
+  const out = new Uint8Array(len); let o = 0; parts.forEach(b => { out.set(b, o); o += b.length; });
+  return out;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('dlsheet')) dlCloseSheet(); });
+
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   // 바깥을 누르면 달력·메뉴 닫기
@@ -809,6 +1096,11 @@ document.addEventListener('click', e => {
     case 'slow': prefs.slow = v === '1'; savePrefs(); render(); break;
     case 'say': speak(v); break;
     case 'backup': backup(); break;
+    case 'dlOpen': dlOpenSheet(); break;
+    case 'dlAbc': makePdf('abc'); break;
+    case 'dlPick': dlPick(v); break;
+    case 'dlClose': dlCloseSheet(); break;
+    case 'dlGo': makePdf('video'); break;
     case 'authGoogle': authGoogle(); break;
     case 'authTab': S.authMode = v; S.authErr = ''; renderAuth(); break;
     case 'authSubmit': authEmailSubmit(); break;
@@ -868,7 +1160,7 @@ document.addEventListener('input', e => {
   if (f === 'term') {
     const b = document.getElementById('spk-' + ctx + '-' + r.id); if (b) b.disabled = !r.term.trim();
     clearTimeout(dupTimers[r.id]);
-    dupTimers[r.id] = setTimeout(() => { const box = document.getElementById('dup-' + ctx + '-' + r.id); if (box) box.outerHTML = dupHTML(r, ctx, ctx === 'i' ? S.inlineId : null); }, 250);
+    dupTimers[r.id] = setTimeout(() => { const box = document.getElementById('dup-' + ctx + '-' + r.id); if (box) box.outerHTML = dupHTML(r, ctx, ctx === 'i' ? S.inlineId : (S.savingId || null)); }, 250);
   }
   if (f === 'memo') {
     const mb = document.getElementById('memospk-' + ctx + '-' + r.id);

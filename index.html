@@ -64,7 +64,8 @@ button{cursor:pointer}
 .inp{width:100%;height:48px;padding:0 14px;border-radius:10px;border:1px solid transparent;background:var(--sub);color:var(--ink);font-size:16px;outline:none}
 .inp:focus{border-color:var(--accent)}
 .inp::placeholder{color:var(--muted);opacity:1}
-.term{font-weight:600;font-size:17px}
+.term{font-weight:600;font-size:16px}
+.term::placeholder{font-weight:400}
 .lbl{font-size:13px;font-weight:500;color:var(--text2)}
 /* header */
 .top{padding-top:12px}
@@ -136,8 +137,10 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .menu{position:absolute;top:44px;right:4px;z-index:25;min-width:140px;display:flex;flex-direction:column;padding:4px;border-radius:12px;border:1px solid var(--line);background:var(--bg);box-shadow:var(--pop)}
 .menu button{display:flex;align-items:center;gap:10px;height:44px;padding:0 12px;border:0;border-radius:8px;background:transparent;color:var(--ink);font-size:15px;text-align:left}
 .menu button.del{color:var(--danger)}
-.confirm{display:flex;flex-direction:column;gap:10px;padding:12px 14px;border-radius:10px;background:var(--sub)}
-.confirm .btns{display:flex;gap:8px;justify-content:flex-end}
+.confirm{display:flex;flex-direction:column;gap:4px;padding:14px 16px 16px;border-radius:10px;background:var(--sub)}
+.confirm > span{word-break:keep-all}
+.confirm .btns{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;align-self:flex-end}
+.confirm .btn2{min-width:56px}
 .btn2{height:40px;padding:0 14px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-weight:500}
 .btn2.danger{border:0;background:var(--danger);color:var(--dangerFg);font-weight:700}
 .bar{display:flex;flex-direction:column;padding-left:14px;border-left:3px solid var(--groupBar)}
@@ -189,6 +192,14 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .modalback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:24px}
 .modalcard{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:var(--bg);box-shadow:var(--pop)}
+.vinfo{position:relative;align-items:center;text-align:center;gap:0;padding:32px 24px}
+.vinfo-x{position:absolute;top:8px;right:8px;color:var(--muted)}
+.vinfo-ico{width:56px;height:56px;border-radius:16px;background:var(--sub);color:var(--ink);display:flex;align-items:center;justify-content:center}
+.vinfo-t{margin-top:16px;font-size:18px;font-weight:700;letter-spacing:-.01em;color:var(--ink)}
+.vinfo-b{margin-top:8px;font-size:15px;line-height:1.55;color:var(--text2);word-break:keep-all}
+.vinfo .spkwave .wb{animation-duration:1.8s}.vinfo .spkwave .wb:nth-child(2){animation-delay:-1.2s}.vinfo .spkwave .wb:nth-child(3){animation-delay:-.6s}.vinfo .spkwave .wb:nth-child(4){animation-delay:-1.5s}.vinfo .spkwave .wb:nth-child(5){animation-delay:-.3s}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .vinfo{background:var(--sub)}:root:not([data-theme="light"]) .vinfo .vinfo-ico{background:var(--bg)}}
+:root[data-theme="dark"] .vinfo{background:var(--sub)}:root[data-theme="dark"] .vinfo .vinfo-ico{background:var(--bg)}
 .dlback{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:flex-end;background:rgba(17,19,24,.45);animation:dlDimIn .24s ease-out}
 .dlsheet{width:100%;max-width:440px;margin:0 auto;box-sizing:border-box;display:flex;flex-direction:column;padding:10px 20px calc(24px + env(safe-area-inset-bottom,0px));border-radius:22px 22px 0 0;background:var(--bg);color:var(--ink);animation:dlUp .34s cubic-bezier(.32,.72,0,1)}
 .dldrag{display:flex;flex-direction:column;margin:-10px -20px 0;padding:10px 20px 0;touch-action:none;cursor:grab}
@@ -434,7 +445,26 @@ if (speechOK) { try { window.speechSynthesis.getVoices(); } catch (e) {} }
 function scrollToBlock(id) {
   requestAnimationFrame(() => {
     const el = document.getElementById('block-' + id);
-    if (el) { const y = el.getBoundingClientRect().top + window.scrollY - 12; window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }); }
+    /* 아이폰 상단(시계·노치) 가림막 높이만큼 더 내려서 콘텐츠 제목이 가려지지 않게 */
+    const safe = parseFloat(getComputedStyle(document.body, '::before').height) || 0;
+    if (el) { const y = el.getBoundingClientRect().top + window.scrollY - safe - 12; window.scrollTo({ top: Math.max(0, y), behavior: 'auto' }); }
+  });
+}
+/* 콘텐츠를 지운 뒤: 바로 아래 콘텐츠가 지운 콘텐츠 자리로 올라오게 하고(제목이 가려져 있었다면 화면 맨 위 바로 아래로),
+   마지막 콘텐츠를 지웠다면 바로 위 콘텐츠의 제목이 가려졌을 때만 보이게 옮김. 기록 저장·삭제 코드는 건드리지 않음 */
+function delNeighbor(id) {
+  const blocks = Array.from(document.querySelectorAll('.block[id^="block-"]'));
+  const i = blocks.findIndex(b => b.id === 'block-' + id); if (i < 0) return null;
+  const nb = blocks[i + 1] || blocks[i - 1]; if (!nb) return null;
+  return { id: nb.id.slice(6), next: !!blocks[i + 1], top: blocks[i].getBoundingClientRect().top };
+}
+function delShowTitle(nb) {
+  requestAnimationFrame(() => {
+    const el = document.getElementById('block-' + nb.id); if (!el) return;
+    const safe = parseFloat(getComputedStyle(document.body, '::before').height) || 0;
+    const top = el.getBoundingClientRect().top, min = safe + 12;
+    const want = nb.next ? Math.max(nb.top, min) : (top < min ? min : top);
+    if (Math.abs(top - want) > 1) window.scrollTo({ top: Math.max(0, window.scrollY + top - want), behavior: 'auto' });
   });
 }
 let toastT = null;
@@ -547,7 +577,7 @@ function renderRecord() {
         '<input class="inp" id="f-url" type="url" inputmode="url" placeholder="https://..." autocomplete="off" autocapitalize="off" value="' + esc(f.url) + '" data-f="url" data-ctx="f"></div>' +
     '</div>' +
     '<div class="col pad" style="gap:12px;padding-top:8px">' +
-      '<div class="row between" style="align-items:baseline"><span class="sec-title">외울 단어·표현</span><span style="font-size:12px;color:var(--muted)">새로 공부한 단어를 기록해 보세요!</span></div>' +
+      '<div class="row between" style="align-items:baseline"><span class="sec-title">외울 단어·표현</span><span style="font-size:12px;font-weight:500;color:var(--muted)">새로 공부한 단어를 기록해 보세요!</span></div>' +
       f.rows.map(r => rowHTML(r, 'f', S.savingId || null)).join('') +
       '<button type="button" class="addrow" data-a="addRow" data-ctx="f">' + ic('plus', 18) + '단어 추가</button>' +
     '</div>' +
@@ -601,7 +631,7 @@ function blockHTML(s, ws) {
       '</div>' +
     '</div>';
   if (S.confirmDel === s.id) {
-    h += '<div class="confirm"><span style="font-size:14px">이 기록과 단어 ' + s.words.length + '개를 지울까요?</span><div class="btns">' +
+    h += '<div class="confirm"><span style="font-size:14px;line-height:1.55">' + (s.words.length ? '이 콘텐츠와 단어 ' + s.words.length + '개를 모두 지울까요?' : '이 콘텐츠를 지울까요?') + '<br>지우면 되돌릴 수 없어요.</span><div class="btns">' +
       '<button type="button" class="btn2" data-a="cancelDel">취소</button><button type="button" class="btn2 danger" data-a="del" data-id="' + s.id + '">삭제</button></div></div>';
   }
   h += '<div class="bar">';
@@ -749,14 +779,13 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.18.2</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.19</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
-      '<div class="modalcard" data-keep="modal" data-a="">' +
-      '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
-      '<button type="button" class="ib" style="margin:-8px -8px 0 0" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button></div>' +
-      '<span style="font-size:14px;line-height:1.6;color:var(--text2)">미국식·영국식 발음은 기기에 그 목소리가 설치돼 있어야 다르게 들려요.</span>' +
-      '<div style="font-size:13px;line-height:1.6;color:var(--text2)"><b style="color:var(--ink)">아이폰</b><br>설정 &gt; 손쉬운 사용 &gt; 읽기 및 말하기(또는 음성 콘텐츠) &gt; 음성 &gt; English에서 방언·목소리 받기</div>' +
-      '<div style="font-size:13px;line-height:1.6;color:var(--text2)"><b style="color:var(--ink)">안드로이드(갤럭시)</b><br>설정 &gt; 일반 &gt; 글자 읽어주기(TTS) &gt; 기본 엔진 설정에서 음성 데이터 내려받기</div>' +
+      '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
+      '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
+      '<span class="vinfo-ico">' + WAVE_SVG(24) + '</span>' +
+      '<span class="vinfo-t">발음이 비슷하게 들린다면</span>' +
+      '<span class="vinfo-b">기기에 설치된 영어 음성에 따라<br>미국식과 영국식 발음이<br>잘 구분되지 않을 수 있어요.</span>' +
       '</div></div>' : '') +
     '</div>';
 }
@@ -1188,12 +1217,12 @@ document.addEventListener('click', e => {
     case 'accent': prefs.accent = v; savePrefs(); render(); break;
     case 'slow': prefs.slow = v === '1'; savePrefs(); render(); break;
     case 'say': speak(v, el); break;
-    case 'backup': backup(); break;
+    case 'backup': dlKeepArm(); backup(); break;
     case 'dlOpen': dlOpenSheet(); break;
-    case 'dlAbc': makePdf('abc'); break;
+    case 'dlAbc': dlKeepArm(); makePdf('abc'); break;
     case 'dlPick': dlPick(v); break;
     case 'dlClose': dlCloseSheet(); break;
-    case 'dlGo': makePdf('video'); break;
+    case 'dlGo': dlKeepArm(); makePdf('video'); break;
     case 'authGoogle': authGoogle(); break;
     case 'authTab': S.authMode = v; S.authErr = ''; renderAuth(); break;
     case 'authSubmit': authEmailSubmit(); break;
@@ -1220,7 +1249,7 @@ document.addEventListener('click', e => {
     case 'saveEdit': saveEdit(); break;
     case 'askDel': S.menuId = null; S.confirmDel = id; S.inlineId = null; S.inlineForm = null; renderList(); break;
     case 'cancelDel': S.confirmDel = null; renderList(); break;
-    case 'del': delSession(id); break;
+    case 'del': { const nb = delNeighbor(id); delSession(id).then(() => { if (nb && !document.getElementById('block-' + id)) delShowTitle(nb); }); break; }
     case 'openKey': S.openKeys[v] = !S.openKeys[v]; renderList(); break;
     case 'calMonth': { const all = Object.keys(D.dates).sort(); const base = S.calMonth || (all.length ? all[all.length - 1] : today()).slice(0, 7); let y = +base.slice(0, 4), m = +base.slice(5, 7) + Number(v); if (m < 1) { m = 12; y--; } if (m > 12) { m = 1; y++; } S.calMonth = y + '-' + pad(m); S.menuId = null; renderList(); break; }
     case 'calPick': S.calSel = v; S.menuId = null; renderList(); break;
@@ -1277,6 +1306,34 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 let scrollLockUntil = 0, userActed = false;
 ['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { userActed = true; }, { passive: true, capture: true }));
 window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollLockUntil && window.scrollY > 0) window.scrollTo(0, 0); }, { passive: true });
+/* 설정에서 PDF·백업을 받고 (파일 보기·저장 화면에) 다녀왔을 때 화면이 저절로 맨 위로 가 있으면, 누르기 직전 위치로 되돌림.
+   - 앱을 떠날 때의 위치가 누르기 직전 위치와 같을 때만, 돌아온 직후 잠깐(1.5초) 동안만 되돌림
+   - 사용자가 화면을 직접 만지거나, 설정 탭이 아니거나, 10분이 지나면 아무것도 하지 않음 (탭 이동·로그인 때 맨 위로 가는 동작은 그대로) */
+let dlKeep = null;
+function dlKeepArm() { dlKeep = S.tab === 'settings' ? { y: window.scrollY, until: Date.now() + 600000, leftY: null, watch: 0 } : null; }
+function dlKeepValid() {
+  if (dlKeep && (Date.now() > dlKeep.until || !S.user || S.tab !== 'settings')) dlKeep = null;
+  return !!dlKeep;
+}
+function dlKeepLeave() { if (dlKeepValid() && dlKeep.leftY === null) dlKeep.leftY = window.scrollY; }
+function dlKeepFix() {
+  if (!dlKeepValid() || Date.now() > dlKeep.watch) return;
+  if (window.scrollY < dlKeep.y - 40) window.scrollTo(0, dlKeep.y);
+}
+function dlKeepBack() {
+  if (!dlKeepValid() || dlKeep.leftY === null) return;
+  if (Math.abs(dlKeep.leftY - dlKeep.y) > 40) { dlKeep = null; return; }
+  dlKeep.watch = Date.now() + 1500;
+  dlKeepFix(); requestAnimationFrame(dlKeepFix); setTimeout(dlKeepFix, 200); setTimeout(dlKeepFix, 600);
+  setTimeout(() => { if (dlKeep && Date.now() > dlKeep.watch) dlKeep = null; }, 1600);
+}
+['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { dlKeep = null; }, { passive: true, capture: true }));
+window.addEventListener('scroll', dlKeepFix, { passive: true });
+window.addEventListener('blur', dlKeepLeave);
+window.addEventListener('pagehide', dlKeepLeave);
+window.addEventListener('pageshow', dlKeepBack);
+window.addEventListener('focus', dlKeepBack);
+document.addEventListener('visibilitychange', () => { if (document.hidden) dlKeepLeave(); else dlKeepBack(); });
 
 render();
 auth.onAuthStateChanged(u => {

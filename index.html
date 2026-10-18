@@ -41,7 +41,7 @@
   --primaryBg:#F3F4F6; --primaryFg:#0B0C0F; --noticeBg:#151C2E; --noticeInk:#A9BEFF;
   --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --pop:0 12px 32px rgba(0,0,0,.5);
 }
-body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:45;pointer-events:none}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:45;pointer-events:none;transform:translateY(var(--vvTop,0px))}
 html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-width:none;-ms-overflow-style:none;background:var(--bg)}
 html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
 *,*::before,*::after{box-sizing:inherit}
@@ -779,7 +779,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.19</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.19.2</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
@@ -1306,34 +1306,45 @@ try { history.scrollRestoration = 'manual'; } catch (e) {}
 let scrollLockUntil = 0, userActed = false;
 ['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { userActed = true; }, { passive: true, capture: true }));
 window.addEventListener('scroll', () => { if (!userActed && Date.now() < scrollLockUntil && window.scrollY > 0) window.scrollTo(0, 0); }, { passive: true });
-/* 설정에서 PDF·백업을 받고 (파일 보기·저장 화면에) 다녀왔을 때 화면이 저절로 맨 위로 가 있으면, 누르기 직전 위치로 되돌림.
-   - 앱을 떠날 때의 위치가 누르기 직전 위치와 같을 때만, 돌아온 직후 잠깐(1.5초) 동안만 되돌림
-   - 사용자가 화면을 직접 만지거나, 설정 탭이 아니거나, 10분이 지나면 아무것도 하지 않음 (탭 이동·로그인 때 맨 위로 가는 동작은 그대로) */
-let dlKeep = null;
-function dlKeepArm() { dlKeep = S.tab === 'settings' ? { y: window.scrollY, until: Date.now() + 600000, leftY: null, watch: 0 } : null; }
-function dlKeepValid() {
-  if (dlKeep && (Date.now() > dlKeep.until || !S.user || S.tab !== 'settings')) dlKeep = null;
-  return !!dlKeep;
+/* 설정에서 PDF·백업을 받고 (파일 보기·저장 화면에) 다녀왔을 때 화면이 저절로 맨 위로 가 있으면, 앱을 떠나기 직전에 보던 위치로 되돌림.
+   - 버튼을 누른 뒤 10분 안에 앱을 떠났다 돌아온 경우에만, 돌아온 직후 3초 동안만 되돌림
+   - 누른 뒤 떠나기 전까지 화면을 직접 움직였다면 떠나는 순간의 위치를, 아니면 누른 순간의 위치를 기억
+   - 돌아온 뒤 사용자가 화면을 만지거나, 설정 탭이 아니면 아무것도 하지 않음 (탭 이동·로그인 때 맨 위로 가는 동작은 그대로) */
+let dlReq = null, dlKeep = null;
+function dlKeepArm() { dlKeep = null; dlReq = S.tab === 'settings' ? { y: window.scrollY, at: Date.now(), touched: false } : null; }
+function dlKeepOn() { return !!S.user && S.tab === 'settings'; }
+function dlKeepLeave() {
+  if (dlKeep || !dlReq) return;
+  if (Date.now() - dlReq.at > 600000 || !dlKeepOn()) { dlReq = null; return; }
+  dlKeep = { y: dlReq.touched ? window.scrollY : dlReq.y, watch: 0 };
 }
-function dlKeepLeave() { if (dlKeepValid() && dlKeep.leftY === null) dlKeep.leftY = window.scrollY; }
 function dlKeepFix() {
-  if (!dlKeepValid() || Date.now() > dlKeep.watch) return;
+  if (!dlKeep || Date.now() > dlKeep.watch || !dlKeepOn()) return;
   if (window.scrollY < dlKeep.y - 40) window.scrollTo(0, dlKeep.y);
 }
 function dlKeepBack() {
-  if (!dlKeepValid() || dlKeep.leftY === null) return;
-  if (Math.abs(dlKeep.leftY - dlKeep.y) > 40) { dlKeep = null; return; }
-  dlKeep.watch = Date.now() + 1500;
-  dlKeepFix(); requestAnimationFrame(dlKeepFix); setTimeout(dlKeepFix, 200); setTimeout(dlKeepFix, 600);
-  setTimeout(() => { if (dlKeep && Date.now() > dlKeep.watch) dlKeep = null; }, 1600);
+  if (!dlKeep) return;
+  dlKeep.watch = Date.now() + 3000;
+  dlKeepFix(); requestAnimationFrame(dlKeepFix); [200, 600, 1200, 2000].forEach(t => setTimeout(dlKeepFix, t));
+  setTimeout(() => { if (dlKeep && Date.now() > dlKeep.watch) { dlKeep = null; dlReq = null; } }, 3100);
 }
-['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => { dlKeep = null; }, { passive: true, capture: true }));
+['touchstart', 'wheel', 'mousedown', 'keydown'].forEach(ev => document.addEventListener(ev, () => {
+  if (dlKeep && dlKeep.watch) { dlKeep = null; dlReq = null; } else if (dlReq) dlReq.touched = true;
+}, { passive: true, capture: true }));
 window.addEventListener('scroll', dlKeepFix, { passive: true });
 window.addEventListener('blur', dlKeepLeave);
 window.addEventListener('pagehide', dlKeepLeave);
 window.addEventListener('pageshow', dlKeepBack);
 window.addEventListener('focus', dlKeepBack);
 document.addEventListener('visibilitychange', () => { if (document.hidden) dlKeepLeave(); else dlKeepBack(); });
+
+/* 아이폰 홈 화면 앱: 키보드가 열려 화면 전체가 위로 밀리면, 시계·배터리 줄 가림막도 실제로 보이는 화면 맨 위로 따라가게 함 */
+if (window.visualViewport) {
+  const vvMask = () => { const t = Math.max(0, Math.round(window.visualViewport.offsetTop || 0)); document.documentElement.style.setProperty('--vvTop', t + 'px'); };
+  window.visualViewport.addEventListener('resize', vvMask);
+  window.visualViewport.addEventListener('scroll', vvMask);
+  vvMask();
+}
 
 render();
 auth.onAuthStateChanged(u => {

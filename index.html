@@ -179,9 +179,13 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:54px;border:0;background:transparent;color:var(--muted);font-weight:500}
 .tabbar button span{font-size:12px}
 .tabbar button[aria-current="page"]{color:var(--ink);font-weight:700}
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:50;max-width:calc(100% - 40px);padding:12px 18px;border-radius:12px;background:var(--primaryBg);color:var(--primaryFg);font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .2s}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:50;width:max-content;max-width:calc(100% - 40px);box-sizing:border-box;text-align:center;white-space:pre-line;word-break:keep-all;overflow-wrap:break-word;padding:12px 18px;border-radius:12px;background:var(--primaryBg);color:var(--primaryFg);font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);pointer-events:none;opacity:0;transition:opacity .2s}
 .toast.show{opacity:1}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
+.spkwave .wb{transform-box:fill-box;transform-origin:center;animation:spkwv .9s ease-in-out infinite}
+.spkwave .wb:nth-child(2){animation-delay:-.6s}.spkwave .wb:nth-child(3){animation-delay:-.3s}.spkwave .wb:nth-child(4){animation-delay:-.75s}.spkwave .wb:nth-child(5){animation-delay:-.15s}
+@keyframes spkwv{0%,100%{transform:scaleY(.5)}50%{transform:scaleY(1)}}
+@media (prefers-reduced-motion: reduce){.spkwave .wb{animation:none}}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 .modalback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;padding:24px}
 .modalcard{width:100%;max-width:340px;display:flex;flex-direction:column;gap:12px;padding:20px;border-radius:16px;background:var(--bg);box-shadow:var(--pop)}
@@ -321,7 +325,7 @@ async function authGoogle() {
   S.authErr = ''; S.authBusy = true; renderAuth();
   try {
     const result = await auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
-    if (result && result.additionalUserInfo && result.additionalUserInfo.isNewUser) toast('회원가입 완료! DAY100 GOAL에 오신 걸 환영해요');
+    if (result && result.additionalUserInfo && result.additionalUserInfo.isNewUser) toast('회원가입 완료!\nDAY100 GOAL에 오신 걸 환영해요');
   } catch (e) { S.authErr = authMsg(e); S.authBusy = false; renderAuth(); }
 }
 async function authEmailSubmit() {
@@ -330,7 +334,7 @@ async function authEmailSubmit() {
   if (pw.length < 6) { S.authErr = '비밀번호는 6자 이상이어야 해요'; renderAuth(); return; }
   S.authErr = ''; S.authBusy = true; renderAuth();
   try {
-    if (S.authMode === 'signup') { await auth.createUserWithEmailAndPassword(email, pw); toast('회원가입 완료! DAY100 GOAL에 오신 걸 환영해요'); }
+    if (S.authMode === 'signup') { await auth.createUserWithEmailAndPassword(email, pw); toast('회원가입 완료!\nDAY100 GOAL에 오신 걸 환영해요'); }
     else await auth.signInWithEmailAndPassword(email, pw);
   } catch (e) { S.authErr = authMsg(e); S.authBusy = false; renderAuth(); }
 }
@@ -365,14 +369,42 @@ async function importBackup(file) {
     toast(added ? '기록 ' + added + '개를 가져왔어요' : '새로 가져올 기록이 없어요');
   } catch (e) {
     S.importing = false; render();
-    toast('가져오지 못했어요. 파일을 확인해 주세요');
+    toast('가져오지 못했어요.\n파일을 확인해 주세요');
   }
 }
 
 /* ---------- speech ---------- */
+/* ABC순 섞기 아이콘 출처: Lucide "shuffle" (ISC License, https://lucide.dev) */
 const speechOK = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
-function speak(text) {
+/* 재생 중 표시: 누른 소리 버튼의 아이콘을 파형 막대로 바꾸고, 소리가 끝나면 원래 아이콘으로 */
+const WAVE_SVG = n => '<svg class="spkwave" width="' + n + '" height="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="wb" d="M4 10v4"/><path class="wb" d="M8 7v10"/><path class="wb" d="M12 4v16"/><path class="wb" d="M16 7v10"/><path class="wb" d="M20 10v4"/></svg>';
+const spk = { key: null, tok: 0, timer: null, started: 0 };
+function spkKey(b) {
+  if (!b) return null;
+  if (b.id) return '#' + b.id;
+  const same = Array.from(document.querySelectorAll('[data-a="say"]')).filter(x => x.dataset.v === b.dataset.v);
+  return 'say|' + same.indexOf(b) + '|' + b.dataset.v;
+}
+function spkFind(key) {
+  if (!key) return null;
+  if (key[0] === '#') return document.getElementById(key.slice(1));
+  const i = key.indexOf('|', 4), n = Number(key.slice(4, i)), v = key.slice(i + 1);
+  return Array.from(document.querySelectorAll('[data-a="say"]')).filter(x => x.dataset.v === v)[n] || null;
+}
+function spkPaint(b, on) {
+  const g = b && b.querySelector('svg'); if (!g) return;
+  if (on === g.classList.contains('spkwave')) return;
+  const n = Number(g.getAttribute('width')) || 20;
+  g.outerHTML = on ? WAVE_SVG(n) : ic('speaker', n);
+}
+function spkStop(tok) {
+  if (tok !== undefined && tok !== spk.tok) return;
+  clearInterval(spk.timer); spk.timer = null;
+  spkPaint(spkFind(spk.key), false); spk.key = null;
+}
+function speak(text, btn) {
   if (!speechOK || !text) return;
+  spkStop();
   try {
     const ss = window.speechSynthesis; ss.cancel();
     const u = new SpeechSynthesisUtterance(text);
@@ -382,8 +414,19 @@ function speak(text) {
     const nl = v => String(v.lang || '').replace('_', '-').toLowerCase();
     const v = vs.find(x => nl(x) === lang.toLowerCase()) || vs.find(x => nl(x).indexOf('en') === 0);
     if (v) u.voice = v;
+    const tok = ++spk.tok;
+    if (btn) {
+      spk.key = spkKey(btn); spk.started = Date.now(); spkPaint(btn, true);
+      u.onend = () => spkStop(tok); u.onerror = () => spkStop(tok);
+      let idle = 0;
+      spk.timer = setInterval(() => {
+        if (tok !== spk.tok) return;
+        if (ss.speaking || ss.pending) { idle = 0; spkPaint(spkFind(spk.key), true); return; }
+        if (Date.now() - spk.started > 1500 && ++idle >= 2) spkStop(tok);
+      }, 200);
+    }
     ss.speak(u);
-  } catch (e) {}
+  } catch (e) { spkStop(); }
 }
 if (speechOK) { try { window.speechSynthesis.getVoices(); } catch (e) {} }
 
@@ -538,7 +581,7 @@ function renderWords() {
       '<button type="button" data-a="setSort" data-v="oldest" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "oldest" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "oldest" ? '700' : '400') + ';color:' + (S.sortBy === "oldest" ? 'var(--ink)' : 'var(--text2)') + '">오래된순</button>' +
       '<button type="button" data-a="setSort" data-v="alpha" style="text-align:left;padding:10px 12px;border-radius:8px;border:0;background:' + (S.sortBy === "alpha" ? 'var(--sub)' : 'transparent') + ';font-size:14px;font-weight:' + (S.sortBy === "alpha" ? '700' : '400') + ';color:' + (S.sortBy === "alpha" ? 'var(--ink)' : 'var(--text2)') + '">알파벳순</button>' +
       '</div>' : '') : '') +
-      (S.mode === 'abc' ? '<button type="button" class="ibs" style="width:42px;height:42px;flex-shrink:0;border-radius:10px;background:' + (S.abcShuffle ? 'var(--segOn)' : 'var(--sub)') + ';color:var(--text2)" data-a="reshuffle" aria-label="섞기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg></button>' : '') +
+      (S.mode === 'abc' ? '<button type="button" class="ibs" style="width:42px;height:42px;flex-shrink:0;border-radius:10px;background:' + (S.abcShuffle ? 'var(--segOn)' : 'var(--sub)') + ';color:var(--text2)" data-a="reshuffle" aria-label="섞기"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 14 4 4-4 4"/><path d="m18 2 4 4-4 4"/><path d="M2 18h1.4c1.3 0 2.5-.6 3.3-1.7l6.1-8.6c.7-1.1 2-1.7 3.3-1.7H22"/><path d="M2 6h1.9c1.5 0 2.9.9 3.6 2.2"/><path d="M22 18h-5.9c-1.3 0-2.6-.7-3.3-1.8l-.5-.8"/></svg></button>' : '') +
       '</div>' : '') +
     '</div>' +
     '<div id="list">' + listHTML() + '</div>';
@@ -706,7 +749,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.18</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.18.2</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard" data-keep="modal" data-a="">' +
       '<div class="row between" style="align-items:flex-start"><span style="font-size:16px;font-weight:700">발음이 비슷하게 들린다면</span>' +
@@ -792,7 +835,7 @@ async function saveEdit() {
 }
 async function delSession(id) {
   try { await store.remove(id); S.sessions = S.sessions.filter(x => x.id !== id); S.confirmDel = null; render(); toast('기록을 지웠어요'); }
-  catch (e) { toast('지우지 못했어요. 잠시 뒤 다시 시도해 주세요.'); }
+  catch (e) { toast('지우지 못했어요.\n잠시 뒤 다시 시도해 주세요.'); }
 }
 async function backup() {
   const list = S.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -1144,7 +1187,7 @@ document.addEventListener('click', e => {
     case 'setTheme': prefs.theme = v; savePrefs(); applyTheme(); render(); break;
     case 'accent': prefs.accent = v; savePrefs(); render(); break;
     case 'slow': prefs.slow = v === '1'; savePrefs(); render(); break;
-    case 'say': speak(v); break;
+    case 'say': speak(v, el); break;
     case 'backup': backup(); break;
     case 'dlOpen': dlOpenSheet(); break;
     case 'dlAbc': makePdf('abc'); break;
@@ -1165,8 +1208,8 @@ document.addEventListener('click', e => {
     case 'addRow': { const f = formOf(ctx); const r = newRow(); f.rows.push(r); rerender(ctx); focusRow(ctx, r.id); break; }
     case 'rmRow': { const f = formOf(ctx); f.rows = f.rows.filter(r => r.id !== rid); if (!f.rows.length) f.rows.push(newRow()); rerender(ctx); break; }
     case 'toggleMemo': { const f = formOf(ctx); const r = f.rows.find(x => x.id === rid); if (r) r.open = !r.open; rerender(ctx); break; }
-    case 'speakRow': { const r = formOf(ctx).rows.find(x => x.id === rid); if (r) speak(r.term); break; }
-    case 'speakMemo': { const r = formOf(ctx).rows.find(x => x.id === rid); if (r) speak(r.memo); break; }
+    case 'speakRow': { const r = formOf(ctx).rows.find(x => x.id === rid); if (r) speak(r.term, el); break; }
+    case 'speakMemo': { const r = formOf(ctx).rows.find(x => x.id === rid); if (r) speak(r.memo, el); break; }
     case 'save': saveNew(); break;
     case 'mode': S.mode = v; S.menuId = null; render(); break;
     case 'menu': S.menuId = S.menuId === id ? null : id; renderList(); break;

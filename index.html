@@ -21,7 +21,7 @@
   --bg:#FFFFFF; --sub:#F4F5F7; --line:#E5E7EB; --ink:#111318; --text2:#454B57; --muted:#6B7280;
   --accent:#2B59E0; --accentSoft:#EEF2FD; --cellOff:#E9EBEF; --cellOn:#111318;
   --primaryBg:#111318; --primaryFg:#FFFFFF; --noticeBg:#F1F4FE; --noticeInk:#2447B8;
-  --segOn:#FFFFFF; --shadow:0 1px 2px rgba(17,19,24,.08); --danger:#C0362C; --dangerFg:#FFFFFF; --groupBar:#C7D4F7;
+  --segOn:#FFFFFF; --shadow:0 1px 2px rgba(17,19,24,.08); --danger:#C0362C; --dangerFg:#FFFFFF; --groupBar:#C7D4F7; --dupLine:#DCE3F7;
   --pop:0 12px 32px rgba(0,0,0,.14);
   --font:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
   box-sizing:border-box;
@@ -32,20 +32,20 @@
     --bg:#0B0C0F; --sub:#17191E; --line:#272A31; --ink:#F3F4F6; --text2:#C9CED6; --muted:#9AA1AD;
     --accent:#7FA0FF; --accentSoft:#1B2338; --cellOff:#22252C; --cellOn:#F3F4F6;
     --primaryBg:#F3F4F6; --primaryFg:#0B0C0F; --noticeBg:#151C2E; --noticeInk:#A9BEFF;
-    --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --pop:0 12px 32px rgba(0,0,0,.5);
+    --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --dupLine:#26314D; --pop:0 12px 32px rgba(0,0,0,.5);
   }
 }
 :root[data-theme="dark"]{
   --bg:#0B0C0F; --sub:#17191E; --line:#272A31; --ink:#F3F4F6; --text2:#C9CED6; --muted:#9AA1AD;
   --accent:#7FA0FF; --accentSoft:#1B2338; --cellOff:#22252C; --cellOn:#F3F4F6;
   --primaryBg:#F3F4F6; --primaryFg:#0B0C0F; --noticeBg:#151C2E; --noticeInk:#A9BEFF;
-  --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --pop:0 12px 32px rgba(0,0,0,.5);
+  --segOn:#2A2D35; --shadow:none; --danger:#FF8A80; --dangerFg:#0B0C0F; --groupBar:#2E3D66; --dupLine:#26314D; --pop:0 12px 32px rgba(0,0,0,.5);
 }
 body::before{content:'';position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:45;pointer-events:none;transform:translateY(var(--vvTop,0px))}
 html{scroll-padding-top:env(safe-area-inset-top,0px);scrollbar-width:none;-ms-overflow-style:none;background:var(--bg)}
 html::-webkit-scrollbar,body::-webkit-scrollbar{display:none;width:0;height:0}
 *,*::before,*::after{box-sizing:inherit}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow-wrap:anywhere;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased;overflow-wrap:anywhere;word-break:keep-all;-webkit-tap-highlight-color:transparent}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -71,12 +71,12 @@ button{cursor:pointer}
 .top{padding-top:12px}
 .logo{display:flex;align-items:center;gap:7px}
 .logo b{font-size:21px;font-weight:800;letter-spacing:-.03em;line-height:1;margin-left:-1px}
-.logo i{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;line-height:1;padding:4px 6px;border-radius:5px;background:var(--accentSoft);color:var(--accent)}
+.logo i{display:inline-flex;align-items:center;height:18px;box-sizing:border-box;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.08em;line-height:1;padding:0 6px;border-radius:5px;background:var(--accentSoft);color:var(--accent)}
 .theme-btn{margin-right:-2.5px}
 .count{display:flex;align-items:baseline;gap:6px}
 .count b{font-size:40px;font-weight:700;letter-spacing:-.03em;line-height:1}
 .count span{font-size:15px;font-weight:500;color:var(--muted)}
-.pill{font-size:12px;font-weight:600;color:var(--accent);background:var(--accentSoft);padding:5px 10px;border-radius:999px}
+.pill{display:inline-flex;align-items:center;height:27px;box-sizing:border-box;font-size:12px;font-weight:600;line-height:1;color:var(--accent);background:var(--accentSoft);padding:0 10px;border-radius:999px}
 .grid{display:grid;grid-template-columns:repeat(20,minmax(0,1fr));gap:4px}
 .grid i{aspect-ratio:1;border-radius:3px;background:var(--cellOff)}
 .grid i.on{background:var(--cellOn)}
@@ -88,17 +88,24 @@ button{cursor:pointer}
 .banner button{height:36px;padding:0 12px;border:0;border-radius:8px;background:var(--noticeInk);color:var(--bg);font-size:13px;font-weight:700;white-space:nowrap}
 /* form */
 .chipwrap{position:relative}
+/* 알약(태그) 안 글자: 글자 위아래의 보이지 않는 여백을 잘라내, 기기마다 글꼴 계산이 달라도 가로·세로 가운데에 오게 */
+.pt{display:block;text-box:trim-both cap alphabetic}
 .chip{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px 0 9px;border-radius:999px;border:1px solid transparent;background:var(--sub);color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap}
 .chip.open{border-color:var(--accent)}
 .chip .ic{display:flex;color:var(--accent)}
-.today-tag{font-size:10px;font-weight:700;line-height:1;padding:3px 5px;border-radius:4px;background:var(--accentSoft);color:var(--accent)}
+.today-tag{display:inline-flex;align-items:center;height:16px;box-sizing:border-box;font-size:10px;font-weight:700;line-height:1;padding:0 5px;border-radius:4px;background:var(--accentSoft);color:var(--accent)}
 .sec-title{font-size:17px;font-weight:700}
 .wrow{display:flex;flex-direction:column;gap:8px;padding:14px 0 2px;border-top:1px solid var(--line)}
 .rm{margin-right:-15px;color:var(--muted)}
-.dup{display:flex;gap:10px;padding:12px 14px;border-radius:10px;background:var(--noticeBg)}
-.dup .ic{color:var(--noticeInk);padding-top:1px;display:flex}
+.dup{display:flex;flex-direction:column;padding:12px 14px;border-radius:10px;background:var(--noticeBg)}
+.dup-h{display:flex;align-items:center;gap:10px}
+.dup .ic{color:var(--noticeInk);display:flex}
 .dup b{font-size:14px;font-weight:600;color:var(--noticeInk)}
-.dup span{font-size:13px;color:var(--text2)}
+.dupi{display:flex;flex-direction:column;gap:4px;margin-top:14px}
+.dupi + .dupi{margin-top:12px;padding-top:11px;border-top:1px solid var(--dupLine)}
+.dupi .dm{font-size:14px;font-weight:500;color:var(--ink)}
+.dupi .dm.none{color:var(--muted)}
+.dupi .dt{font-size:12px;color:var(--muted)}
 .toggle{align-self:flex-start;display:flex;align-items:center;gap:4px;height:36px;padding:0 6px;margin-left:-8.5px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:13px;font-weight:500}
 .addrow{height:48px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;border:1px dashed var(--line);background:transparent;color:var(--text2);font-size:15px;font-weight:500}
 .primary{width:100%;height:54px;border:0;border-radius:14px;background:var(--primaryBg);color:var(--primaryFg);font-size:16px;font-weight:700}
@@ -131,7 +138,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .block{display:flex;flex-direction:column;gap:8px}
 .btitle{color:var(--ink);text-decoration:none;font-size:16px;font-weight:700;line-height:1.4}
 .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:3px}
-.tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:6px;background:var(--sub);color:var(--text2);font-size:12px;font-weight:500}
+.tag{display:inline-flex;align-items:center;gap:4px;height:22px;box-sizing:border-box;line-height:1;padding:0 8px;border-radius:6px;background:var(--sub);color:var(--text2);font-size:12px;font-weight:500}
 .tag.blue{background:var(--accentSoft);color:var(--accent);font-weight:600}
 .menuwrap{position:relative;flex-shrink:0;margin-right:-8px}
 .menu{position:absolute;top:44px;right:4px;z-index:25;min-width:140px;display:flex;flex-direction:column;padding:4px;border-radius:12px;border:1px solid var(--line);background:var(--bg);box-shadow:var(--pop)}
@@ -147,14 +154,14 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .w{display:flex;flex-direction:column;gap:2px;padding:10px 0}
 .w + .w{border-top:1px solid var(--line)}
 .wterm{font-size:17px;font-weight:600;letter-spacing:-.01em}
-.nth{font-size:12px;font-weight:600;color:var(--accent);background:var(--accentSoft);padding:3px 8px;border-radius:999px;white-space:nowrap}
+.nth{display:inline-flex;align-items:center;height:22px;box-sizing:border-box;font-size:12px;font-weight:600;line-height:1;color:var(--accent);background:var(--accentSoft);padding:0 8px;border-radius:999px;white-space:nowrap}
 .wmean{font-size:15px;color:var(--text2)}
 .wmemo{font-size:14px;color:var(--muted)}
 .spk{margin-right:-8px}
 .letter{font-size:22px;font-weight:700;color:var(--accent);padding-top:12px;padding-left:6px}
 .aitem{display:flex;flex-direction:column;gap:2px;padding:12px 0 12px 6px}
 .atoggle{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:0;color:var(--ink);min-height:36px;text-align:left}
-.xn{font-size:12px;font-weight:700;color:var(--accent);background:var(--accentSoft);padding:3px 8px;border-radius:999px}
+.xn{display:inline-flex;align-items:center;height:22px;box-sizing:border-box;font-size:12px;font-weight:700;line-height:1;color:var(--accent);background:var(--accentSoft);padding:0 8px;border-radius:999px}
 .src{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-top:4px}
 .src span:first-child{flex-shrink:0;white-space:nowrap}
 .entries{display:flex;flex-direction:column;gap:12px;margin-top:10px;padding:14px;border-radius:12px;background:var(--sub)}
@@ -219,8 +226,9 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .authlogo{display:flex;flex-direction:column;align-items:center;gap:10px}
 .authlogo .logo{display:flex;align-items:center;gap:8px}
 .authlogo .logo b{font-size:30px;font-weight:800;letter-spacing:-.03em}
-.authlogo .logo i{font-style:normal;font-size:12px;font-weight:700;letter-spacing:.08em;padding:5px 8px;border-radius:6px;background:var(--accentSoft);color:var(--accent)}
+.authlogo .logo i{height:22px;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.08em;padding:0 8px;border-radius:6px;background:var(--accentSoft);color:var(--accent)}
 .authlogo span{font-size:13px;color:var(--muted)}
+.authlogo .logo i .pt{font-size:inherit;color:inherit}
 .authcard{width:100%;max-width:340px;display:flex;flex-direction:column;gap:14px}
 .gbtn{display:flex;align-items:center;justify-content:center;gap:10px;height:50px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:15px;font-weight:600}
 .divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
@@ -503,10 +511,12 @@ function dupHTML(row, ctx, excludeId) {
   const prior = k ? (D.byKey[k] || []).filter(x => x.s.id !== excludeId) : [];
   const last = prior.length ? prior[prior.length - 1] : null;
   if (!last) return '<div id="dup-' + ctx + '-' + row.id + '"></div>';
-  return '<div id="dup-' + ctx + '-' + row.id + '"><div class="dup"><span class="ic">' + ic('repeat', 16) + '</span><div class="col" style="gap:4px">' +
-    '<b>이미 ' + prior.length + '번 만난 단어예요</b>' +
-    '<span>' + esc(kor(last.s.date)) + '  ' + esc(last.s.title) + '</span>' +
-    '<span>지난 뜻: ' + esc(last.w.meaning || '뜻 없음') + '</span></div></div></div>';
+  /* 전에 만난 기록을 모두, 최신이 위로: 뜻(위) + 날짜·콘텐츠 제목(아래). 묶음 사이 연한 실선 */
+  return '<div id="dup-' + ctx + '-' + row.id + '"><div class="dup"><div class="dup-h"><span class="ic">' + ic('repeat', 16) + '</span>' +
+    '<b>이미 ' + prior.length + '번 만난 단어예요</b></div>' +
+    prior.slice().reverse().map(x => '<div class="dupi"><span class="dm' + (x.w.meaning ? '' : ' none') + '">' + esc(x.w.meaning || '뜻 없음') + '</span>' +
+      '<span class="dt">' + esc(md(x.s.date)) + '  ' + esc(x.s.title) + '</span></div>').join('') +
+    '</div></div>';
 }
 function rowHTML(r, ctx, excludeId) {
   const a = 'data-ctx="' + ctx + '" data-row="' + r.id + '"';
@@ -547,7 +557,7 @@ function pickerHTML(ctx, curDate) {
 function chipHTML(ctx, date) {
   const open = S.picker === ctx;
   return '<div class="chipwrap"><button type="button" class="chip' + (open ? ' open' : '') + '" data-a="picker" data-ctx="' + ctx + '" aria-expanded="' + open + '" aria-label="공부한 날 바꾸기">' +
-    '<span class="ic">' + ic('cal', 15) + '</span><span>' + esc(kor(date)) + '</span>' + (date === D.T ? '<span class="today-tag">오늘</span>' : '') + '</button>' +
+    '<span class="ic">' + ic('cal', 15) + '</span><span class="pt">' + esc(kor(date)) + '</span>' + (date === D.T ? '<span class="today-tag"><span class="pt">오늘</span></span>' : '') + '</button>' +
     (open ? pickerHTML(ctx, date) : '') + '</div>';
 }
 
@@ -559,10 +569,10 @@ function renderRecord() {
   for (let i = 0; i < 100; i++) cells += '<i class="' + (i < n ? ((D.dates[D.T] && i === n - 1) ? 'today' : 'on') : '') + '"></i>';
   const status = ''; const banner = '';
   return '<div class="col pad top" style="gap:18px">' +
-      '<div class="row between"><div class="logo"><b>DAY100</b><i>GOAL</i></div>' + themeBtn() + '</div>' +
+      '<div class="row between"><div class="logo"><b>DAY100</b><i><span class="pt">GOAL</span></i></div>' + themeBtn() + '</div>' +
       '<div class="col" style="gap:14px">' +
         '<div class="row between" style="align-items:flex-end"><div class="count"><b>' + D.count + '</b><span>/ 100번</span></div>' +
-        (D.dates[D.T] ? '<span class="pill">오늘 완료</span>' : '<span style="font-size:12px;font-weight:500;color:var(--muted)">오늘 공부를 기록해 보세요!</span>') + '</div>' +
+        (D.dates[D.T] ? '<span class="pill"><span class="pt">오늘 완료</span></span>' : '<span style="font-size:12px;font-weight:500;color:var(--muted)">오늘 공부를 기록해 보세요!</span>') + '</div>' +
         '<div class="grid" aria-label="100번 중 ' + D.count + '번 완료">' + cells + '</div>' +
         '<div class="stats"><span>오늘 단어<b>' + D.todayW + '</b></span><span>전체 단어<b>' + D.total + '</b></span></div>' +
         status + banner +
@@ -625,7 +635,7 @@ function blockHTML(s, ws) {
   let h = '<div class="block" id="block-' + s.id + '">' +
     '<div class="row between" style="align-items:flex-start;gap:8px">' +
       '<div class="col" style="gap:3px;min-width:0;padding-top:6px">' + title +
-        '<div class="tags"><span class="tag">' + ic('cal', 12) + esc(kor(s.date)) + '</span><span class="tag blue">단어 ' + s.words.length + '개</span></div></div>' +
+        '<div class="tags"><span class="tag">' + ic('cal', 12) + '<span class="pt">' + esc(kor(s.date)) + '</span></span><span class="tag blue"><span class="pt">단어 ' + s.words.length + '개</span></span></div></div>' +
       '<div class="menuwrap" data-keep="menu"><button type="button" class="ib" style="color:var(--muted)' + (menuOpen ? ';background:var(--sub)' : '') + '" data-a="menu" data-id="' + s.id + '" aria-label="더보기" aria-expanded="' + menuOpen + '">' + ic('dots') + '</button>' +
         (menuOpen ? '<div class="menu"><button type="button" data-a="edit" data-id="' + s.id + '">' + ic('edit', 17) + '수정</button><button type="button" class="del" data-a="askDel" data-id="' + s.id + '">' + ic('trash', 17) + '삭제</button></div>' : '') +
       '</div>' +
@@ -639,7 +649,7 @@ function blockHTML(s, ws) {
   ws.forEach(w => {
     const nth = D.nthOf[w.id] || 0;
     h += '<div class="w"><div class="row between" style="gap:8px"><div class="row" style="gap:8px;min-width:0"><span class="wterm">' + esc(w.term) + '</span>' +
-      (nth > 1 ? '<span class="nth">' + nth + '번째</span>' : '') + '</div>' +
+      (nth > 1 ? '<span class="nth"><span class="pt">' + nth + '번째</span></span>' : '') + '</div>' +
       (speechOK ? '<button type="button" class="ibs spk" data-a="say" data-v="' + esc(w.term) + '" aria-label="단어 발음 듣기">' + ic('speaker', 18) + '</button>' : '') + '</div>' +
       '<span class="wmean">' + esc(w.meaning || '뜻 없음') + '</span>' +
       (w.memo ? '<div class="row between" style="gap:8px"><span class="wmemo">' + esc(w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="color:var(--muted)" data-a="say" data-v="' + esc(w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 16) + '</button>' : '') + '</div>' : '') +
@@ -697,15 +707,17 @@ function listHTML() {
       const latest = all.find(x => x.w.meaning) || all[0];
       const n = all.length, open = n > 1 && !!S.openKeys[k];
       let it = '<div class="aitem"><div class="row between" style="gap:8px">';
-      if (n > 1) it += '<button type="button" class="atoggle" data-a="openKey" data-v="' + esc(k) + '" aria-expanded="' + open + '"><span class="wterm">' + esc(all[0].w.term) + '</span><span class="xn">×' + n + '</span><span style="display:flex;color:var(--muted)">' + ic(open ? 'chevUp' : 'chevDown', 16) + '</span></button>';
+      if (n > 1) it += '<button type="button" class="atoggle" data-a="openKey" data-v="' + esc(k) + '" aria-expanded="' + open + '"><span class="wterm">' + esc(all[0].w.term) + '</span><span class="xn"><span class="pt">×' + n + '</span></span><span style="display:flex;color:var(--muted)">' + ic(open ? 'chevUp' : 'chevDown', 16) + '</span></button>';
       else it += '<span class="wterm">' + esc(all[0].w.term) + '</span>';
       it += (speechOK ? '<button type="button" class="ibs spk" data-a="say" data-v="' + esc(all[0].w.term) + '" aria-label="단어 발음 듣기">' + ic('speaker', 18) + '</button>' : '') + '</div>';
       it += '<span class="wmean">' + esc(latest.w.meaning || '뜻 없음') + '</span>';
       if (n === 1) it += '<div class="src"><span>' + md(all[0].s.date) + '</span><span>' + esc(all[0].s.title) + '</span></div>';
       if (open) {
-        it += '<div class="entries">' + all.map(x => '<div class="entry"><div class="row" style="gap:8px;align-items:baseline"><span style="font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap">' + md(x.s.date) + '</span><span style="font-size:13px;font-weight:500;color:var(--text2)">' + esc(x.s.title) + '</span></div>' +
+        /* 뜻 → 예문 → 날짜·콘텐츠(아래 작게): 중복 알림·한 번 만난 단어·PDF와 같은 순서 */
+        it += '<div class="entries">' + all.map(x => '<div class="entry">' +
           '<span style="font-size:15px">' + esc(x.w.meaning || '뜻 없음') + '</span>' +
-          (x.w.memo ? '<div class="row between" style="gap:8px"><span class="wmemo">' + esc(x.w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="width:32px;height:32px;color:var(--muted)" data-a="say" data-v="' + esc(x.w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 15) + '</button>' : '') + '</div>' : '') +
+          (x.w.memo ? '<div class="row between" style="gap:8px"><span class="wmemo">' + esc(x.w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="width:32px;height:32px;margin:-7px -8px -7px 0;color:var(--muted)" data-a="say" data-v="' + esc(x.w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 15) + '</button>' : '') + '</div>' : '') +
+          '<div class="src" style="margin-top:2px"><span>' + md(x.s.date) + '</span><span>' + esc(x.s.title) + '</span></div>' +
           '</div>').join('') + '</div>';
       }
       items += it + '</div>';
@@ -745,7 +757,7 @@ function listHTML() {
 /* ---------- screen: 설정 ---------- */
 function renderSettings() {
   const segBtn = (a, v, on, l) => '<button type="button" data-a="' + a + '" data-v="' + v + '" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '">' + l + '</button>';
-  return '<div class="row pad top" style="min-height:56px"><span class="htitle">설정</span></div>' +
+  return '<div class="row between pad top" style="min-height:56px"><span class="htitle">설정</span>' + themeBtn() + '</div>' +
     '<div class="col pad" style="gap:20px">' +
     (speechOK ? '<div class="sgroup"><div class="row between" style="align-items:center"><span class="slabel">발음</span>' +
 '<button type="button" class="ibs" style="color:var(--muted)" data-a="voiceInfo" aria-label="발음 안내">' + ic('info', 18) + '</button></div><div class="scard">' +
@@ -753,8 +765,6 @@ function renderSettings() {
       '<div class="row between" style="gap:12px"><span style="font-size:14px;color:var(--ink)">속도</span><div class="seg">' + segBtn('slow', '0', !prefs.slow, '보통') + segBtn('slow', '1', prefs.slow, '천천히') + '</div></div>' +
       '<button type="button" class="outline" data-a="say" data-v="Nice to meet you. I finally figured it out.">' + ic('speaker', 16) + '이 설정으로 들어보기</button>' +
       '</div><span style="font-size:13px;color:var(--muted)">영어 단어와 예문을 이 설정으로 읽어드려요!</span></div>' : '') +
-    '<div class="sgroup"><span class="slabel">화면</span><div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between"><span style="font-size:14px;color:var(--ink)">테마</span><div class="seg">' +
-      segBtn('setTheme', 'light', prefs.theme !== 'dark', '라이트') + segBtn('setTheme', 'dark', prefs.theme === 'dark', '다크') + '</div></div></div>' +
     '<div class="sgroup"><span class="slabel">단어장 내려받기</span><div class="scard">' +
       '<span style="font-size:14px;line-height:1.55;word-break:keep-all;color:var(--ink)">단어장을 보이는 순서 그대로 PDF로 받아요.</span>' +
       '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">' +
@@ -779,7 +789,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.19.2</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.21</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
@@ -795,7 +805,7 @@ function renderAuth() {
   const tabBtn = (m, l) => '<button type="button" data-a="authTab" data-v="' + m + '" class="' + (S.authMode === m ? 'on' : '') + '">' + l + '</button>';
   $('#auth-screen').innerHTML =
     '<div class="authwrap">' +
-      '<div class="authlogo"><div class="logo"><b>DAY100</b><i>GOAL</i></div><span>100 &gt; 평생</span></div>' +
+      '<div class="authlogo"><div class="logo"><b>DAY100</b><i><span class="pt">GOAL</span></i></div><span>100 &gt; 평생</span></div>' +
       '<div class="authcard">' +
         '<button type="button" class="gbtn" data-a="authGoogle"' + (S.authBusy ? ' disabled' : '') + '>Google로 계속하기</button>' +
         '<div class="divider">또는</div>' +

@@ -162,8 +162,9 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .aitem{display:flex;flex-direction:column;gap:2px;padding:12px 0 12px 6px}
 .atoggle{display:flex;align-items:center;gap:8px;border:0;background:transparent;padding:0;color:var(--ink);min-height:36px;text-align:left}
 .xn{display:inline-flex;align-items:center;height:22px;box-sizing:border-box;font-size:12px;font-weight:700;line-height:1;color:var(--accent);background:var(--accentSoft);padding:0 8px;border-radius:999px}
-.src{display:flex;gap:8px;font-size:12px;color:var(--muted);margin-top:4px}
-.src span:first-child{flex-shrink:0;white-space:nowrap}
+/* 날짜·콘텐츠 줄: 중복 알림처럼 날짜 뒤 한 칸 띄우고, 길면 다음 줄이 왼쪽 끝부터 */
+.src{font-size:12px;color:var(--muted);margin-top:4px}
+.src span:first-child{white-space:nowrap}
 .entries{display:flex;flex-direction:column;gap:12px;margin-top:10px;padding:14px;border-radius:12px;background:var(--sub)}
 .entry{display:flex;flex-direction:column;gap:4px}
 .entry + .entry{border-top:1px solid var(--line);padding-top:12px}
@@ -711,13 +712,13 @@ function listHTML() {
       else it += '<span class="wterm">' + esc(all[0].w.term) + '</span>';
       it += (speechOK ? '<button type="button" class="ibs spk" data-a="say" data-v="' + esc(all[0].w.term) + '" aria-label="단어 발음 듣기">' + ic('speaker', 18) + '</button>' : '') + '</div>';
       it += '<span class="wmean">' + esc(latest.w.meaning || '뜻 없음') + '</span>';
-      if (n === 1) it += '<div class="src"><span>' + md(all[0].s.date) + '</span><span>' + esc(all[0].s.title) + '</span></div>';
+      if (n === 1) it += '<div class="src"><span>' + md(all[0].s.date) + '</span> <span>' + esc(all[0].s.title) + '</span></div>';
       if (open) {
         /* 뜻 → 예문 → 날짜·콘텐츠(아래 작게): 중복 알림·한 번 만난 단어·PDF와 같은 순서 */
         it += '<div class="entries">' + all.map(x => '<div class="entry">' +
           '<span style="font-size:15px">' + esc(x.w.meaning || '뜻 없음') + '</span>' +
           (x.w.memo ? '<div class="row between" style="gap:8px"><span class="wmemo">' + esc(x.w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="width:32px;height:32px;margin:-7px -8px -7px 0;color:var(--muted)" data-a="say" data-v="' + esc(x.w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 15) + '</button>' : '') + '</div>' : '') +
-          '<div class="src" style="margin-top:2px"><span>' + md(x.s.date) + '</span><span>' + esc(x.s.title) + '</span></div>' +
+          '<div class="src" style="margin-top:2px"><span>' + md(x.s.date) + '</span> <span>' + esc(x.s.title) + '</span></div>' +
           '</div>').join('') + '</div>';
       }
       items += it + '</div>';
@@ -784,12 +785,12 @@ function renderSettings() {
     (S.logoutAsk
       ? '<div class="scard" style="gap:12px"><span style="font-size:14px;color:var(--ink)">로그아웃할까요?</span><div style="display:flex;gap:8px;justify-content:flex-end">' +
         '<button type="button" class="btn2" data-a="cancelSignout">취소</button>' +
-        '<button type="button" class="btn2" style="border:0;background:var(--ink);color:var(--bg);font-weight:700" data-a="signout">로그아웃</button></div></div>'
+        '<button type="button" class="btn2" style="border:0;background:var(--ink);color:var(--bg);font-weight:500" data-a="signout">로그아웃</button></div></div>'
       : '<div class="scard" style="flex-direction:row;align-items:center;justify-content:space-between">' +
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.21</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.23</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
@@ -1090,7 +1091,19 @@ async function buildWordsPdf(kind, sort) {
     const keys = Object.keys(d.byKey).sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' }));
     const COLW = (PW - 2 * M - 32) / 2, TW = COLW - 4;
     const fW = font(600, 15), fM = font(400, 13), fE = font(400, 12), fSd = font(700, 10.5), fSt = font(400, 10.5);
-    const srcOf = (s, w) => { const dw = tw(md(s.date), fSd) + 6; const lines = wrap(s.title, fSt, w - dw); return { dw, lines, h: lines.length * 15 }; };
+    /* 날짜·콘텐츠 줄: 날짜 뒤 한 칸 띄우고 첫 줄은 날짜 옆에서, 넘어간 줄은 왼쪽 끝부터(앱과 같게) */
+    const wrapAfter = (text, f, w1, w) => {
+      mc.font = f; const words = String(text || '').split(/\s+/).filter(Boolean); const out = []; let line = '', max = w1;
+      words.forEach(t => {
+        const cand = line ? line + ' ' + t : t;
+        if (mc.measureText(cand).width <= max) { line = cand; return; }
+        if (line) { out.push(line); max = w; line = ''; }
+        if (mc.measureText(t).width > max) { const parts = wrap(t, f, max); parts.slice(0, -1).forEach(p => { out.push(p); max = w; }); line = parts[parts.length - 1]; } else line = t;
+      });
+      if (line || !out.length) out.push(line);
+      return out;
+    };
+    const srcOf = (s, w) => { const dw = tw(md(s.date), fSd) + tw(' ', fSt); const lines = wrapAfter(s.title, fSt, w - dw, w); return { dw, lines, h: lines.length * 15 }; };
     const units = []; let cur = null;
     keys.forEach(k => {
       const all = d.byKey[k].slice().reverse();
@@ -1105,7 +1118,7 @@ async function buildWordsPdf(kind, sort) {
           let yy = top + 9; termL.forEach(l => { text(l, x0 + 4, yy + 10, fW, C.ink); yy += 20; });
           yy += 3; ml.forEach(l => { text(l, x0 + 4, yy + 9, fM, C.t2); yy += 18; });
           if (el.length) { yy += 3; el.forEach(l => { text(l, x0 + 4, yy + 8.5, fE, C.mu); yy += 17; }); }
-          yy += 4; text(md(x.s.date), x0 + 4, yy + 7.5, fSd, C.mu); sr.lines.forEach(l => { text(l, x0 + 4 + sr.dw, yy + 7.5, fSt, C.mu); yy += 15; });
+          yy += 4; text(md(x.s.date), x0 + 4, yy + 7.5, fSd, C.mu); sr.lines.forEach((l, i) => { text(l, x0 + 4 + (i ? 0 : sr.dw), yy + 7.5, fSt, C.mu); yy += 15; });
           rect(x0, top + h - 1, COLW, 1, C.sep);
         } });
       } else {
@@ -1124,7 +1137,7 @@ async function buildWordsPdf(kind, sort) {
             const ex = x0 + 16;
             e.ml.forEach(l => { text(l, ex, ey + 9, fM, C.t2); ey += 18; });
             if (e.el.length) { ey += 2; e.el.forEach(l => { text(l, ex, ey + 8.5, fE, C.mu); ey += 17; }); }
-            ey += 3; text(md(e.x.s.date), ex, ey + 7.5, fSd, C.mu); e.sr.lines.forEach(l => { text(l, ex + e.sr.dw, ey + 7.5, fSt, C.mu); ey += 15; });
+            ey += 3; text(md(e.x.s.date), ex, ey + 7.5, fSd, C.mu); e.sr.lines.forEach((l, i) => { text(l, ex + (i ? 0 : e.sr.dw), ey + 7.5, fSt, C.mu); ey += 15; });
           });
           if (last) rect(x0, top + h - 1, COLW, 1, C.sep);
           return h;

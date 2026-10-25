@@ -360,10 +360,10 @@ async function authEmailSubmit() {
 }
 function authMsg(e) {
   const c = e && e.code || '';
-  if (c === 'auth/email-already-in-use') return '이미 가입된 이메일이에요. 로그인해 주세요';
+  if (c === 'auth/email-already-in-use') return '이미 가입된 이메일이에요. 로그인해 주세요.';
   if (c === 'auth/invalid-credential' || c === 'auth/wrong-password' || c === 'auth/user-not-found') return '이메일 또는 비밀번호가 맞지 않아요';
   if (c === 'auth/invalid-email') return '이메일 형식을 확인해 주세요';
-  if (c === 'auth/popup-closed-by-user') return '로그인 창이 닫혔어요. 다시 시도해 주세요';
+  if (c === 'auth/popup-closed-by-user') return '로그인 창이 닫혔어요. 다시 시도해 주세요.';
   if (c === 'auth/weak-password') return '비밀번호는 6자 이상이어야 해요';
   return '로그인하지 못했어요. 잠시 뒤 다시 시도해 주세요.';
 }
@@ -389,7 +389,7 @@ async function importBackup(file) {
     toast(added ? '기록 ' + added + '개를 가져왔어요' : '새로 가져올 기록이 없어요');
   } catch (e) {
     S.importing = false; render();
-    toast('가져오지 못했어요.\n파일을 확인해 주세요');
+    toast('가져오지 못했어요\n파일을 확인해 주세요');
   }
 }
 
@@ -646,7 +646,7 @@ function blockHTML(s, ws) {
       '<button type="button" class="btn2" data-a="cancelDel">취소</button><button type="button" class="btn2 danger" data-a="del" data-id="' + s.id + '">삭제</button></div></div>';
   }
   h += '<div class="bar">';
-  if (!ws.length) h += '<span style="padding:8px 0;font-size:14px;color:var(--muted)">등록한 단어가 없어요</span>';
+  if (!ws.length) h += '<span style="padding:8px 0;font-size:14px;color:var(--muted)">등록한 단어가 없어요.</span>';
   ws.forEach(w => {
     const nth = D.nthOf[w.id] || 0;
     h += '<div class="w"><div class="row between" style="gap:8px"><div class="row" style="gap:8px;min-width:0"><span class="wterm">' + esc(w.term) + '</span>' +
@@ -689,7 +689,7 @@ function listHTML() {
       if (q && !ws.length && S.inlineId !== s.id) return;
       h += blockHTML(s, ws);
     });
-    if (!h) return '<div class="pad" style="padding-top:40px;text-align:center;font-size:15px;color:var(--muted)">‘' + esc(S.q) + '’에 맞는 단어가 없어요</div>';
+    if (!h) return '<div class="pad" style="padding-top:40px;text-align:center;font-size:15px;color:var(--muted)">‘' + esc(S.q) + '’에 맞는 단어가 없어요.</div>';
     return '<div class="blocks pad" style="padding-top:4px">' + h + '</div>';
   }
   if (S.mode === 'abc') {
@@ -724,7 +724,7 @@ function listHTML() {
       items += it + '</div>';
     });
     if (shuf) h = '<div class="col">' + items + '</div>'; else flush();
-    if (!shown) return q ? '<div class="pad" style="padding-top:40px;text-align:center;font-size:15px;color:var(--muted)">‘' + esc(S.q) + '’에 맞는 단어가 없어요</div>' : '<div class="pad" style="padding-top:24px;font-size:15px;color:var(--muted)">등록한 단어가 없어요</div>';
+    if (!shown) return q ? '<div class="pad" style="padding-top:40px;text-align:center;font-size:15px;color:var(--muted)">‘' + esc(S.q) + '’에 맞는 단어가 없어요.</div>' : '<div class="pad" style="padding-top:24px;font-size:15px;color:var(--muted)">등록한 단어가 없어요.</div>';
     const distinct = Object.keys(D.byKey).length;
     return '<div class="col pad"><div class="row between" style="height:20px;margin-top:8px;margin-bottom:4px;padding-left:6px"><span style="font-size:14px;color:var(--text2)">서로 다른 단어 <b style="color:var(--ink)">' + distinct + '</b>개</span>' +
       (shuf ? '<button type="button" data-a="exitShuffle" style="position:relative;z-index:1;box-sizing:border-box;display:flex;align-items:center;gap:2px;min-height:36px;padding:8px 0 8px 10px;border:0;background:transparent;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;color:var(--accent)">알파벳순으로<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>' : '') +
@@ -790,13 +790,13 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.23</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.25</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
       '<span class="vinfo-ico">' + WAVE_SVG(24) + '</span>' +
       '<span class="vinfo-t">발음이 비슷하게 들린다면</span>' +
-      '<span class="vinfo-b">기기에 설치된 영어 음성에 따라<br>미국식과 영국식 발음이<br>잘 구분되지 않을 수 있어요.</span>' +
+      '<span class="vinfo-b">기기에 설치된 영어 음성에 따라<br>미국식과 영국식 발음이<br>잘 구분되지 않을 수 있어요</span>' +
       '</div></div>' : '') +
     '</div>';
 }
@@ -875,7 +875,7 @@ async function saveEdit() {
 }
 async function delSession(id) {
   try { await store.remove(id); S.sessions = S.sessions.filter(x => x.id !== id); S.confirmDel = null; render(); toast('기록을 지웠어요'); }
-  catch (e) { toast('지우지 못했어요.\n잠시 뒤 다시 시도해 주세요.'); }
+  catch (e) { toast('지우지 못했어요\n잠시 뒤 다시 시도해 주세요'); }
 }
 async function backup() {
   const list = S.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || (a.createdAt || 0) - (b.createdAt || 0));
@@ -1064,7 +1064,7 @@ async function buildWordsPdf(kind, sort) {
       } };
     };
     sorted.forEach(s => {
-      const items = s.words.length ? s.words.map(itemOf) : [{ h: 36, draw: top => text('등록한 단어가 없어요', IX, top + 18, fM, C.mu) }];
+      const items = s.words.length ? s.words.map(itemOf) : [{ h: 36, draw: top => text('등록한 단어가 없어요.', IX, top + 18, fM, C.mu) }];
       let idx = 0, cont = false;
       while (idx < items.length) {
         const tl = wrap(s.title + (cont ? ' (이어서)' : ''), fT, BW - 40);
@@ -1150,7 +1150,7 @@ async function buildWordsPdf(kind, sort) {
     text(String(keys.length), M + 4 + tw('서로 다른 단어 ', font(400, 12)), colTop + 9, font(700, 12), C.ink);
     text('개', M + 4 + tw('서로 다른 단어 ', font(400, 12)) + tw(String(keys.length), font(700, 12)), colTop + 9, font(400, 12), C.t2);
     colTop += 18 + 14;
-    if (!keys.length) text('등록한 단어가 없어요', M + 4, colTop + 10, font(400, 13), C.mu);
+    if (!keys.length) text('등록한 단어가 없어요.', M + 4, colTop + 10, font(400, 13), C.mu);
     let col = 0, y = colTop;
     const nextCol = () => { if (col === 0) { col = 1; y = colTop; } else { newPage(); colTop = TOP; col = 0; y = TOP; } };
     for (let i = 0; i < units.length; i++) {

@@ -398,7 +398,7 @@ async function importBackup(file) {
 const speechOK = typeof window.speechSynthesis !== 'undefined' && typeof window.SpeechSynthesisUtterance !== 'undefined';
 /* 재생 중 표시: 누른 소리 버튼의 아이콘을 파형 막대로 바꾸고, 소리가 끝나면 원래 아이콘으로 */
 const WAVE_SVG = n => '<svg class="spkwave" width="' + n + '" height="' + n + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path class="wb" d="M4 10v4"/><path class="wb" d="M8 7v10"/><path class="wb" d="M12 4v16"/><path class="wb" d="M16 7v10"/><path class="wb" d="M20 10v4"/></svg>';
-const spk = { key: null, tok: 0, timer: null, started: 0 };
+const spk = { key: null, tok: 0, timer: null, started: 0, u: null, limit: 0 };
 function spkKey(b) {
   if (!b) return null;
   if (b.id) return '#' + b.id;
@@ -435,12 +435,16 @@ function speak(text, btn) {
     const v = vs.find(x => nl(x) === lang.toLowerCase()) || vs.find(x => nl(x).indexOf('en') === 0);
     if (v) u.voice = v;
     const tok = ++spk.tok;
+    spk.u = u; /* 소리가 끝날 때까지 붙잡아 둠(놓치면 끝 신호가 안 올 수 있음) */
     if (btn) {
       spk.key = spkKey(btn); spk.started = Date.now(); spkPaint(btn, true);
+      /* 안전장치: 기기가 '재생 중' 상태를 계속 붙잡고 있어도, 글자 수로 잡은 최대 시간이 지나면 아이콘을 원래대로 */
+      spk.limit = Math.min(20000, 3000 + text.length * 130 / u.rate);
       u.onend = () => spkStop(tok); u.onerror = () => spkStop(tok);
       let idle = 0;
       spk.timer = setInterval(() => {
         if (tok !== spk.tok) return;
+        if (Date.now() - spk.started > spk.limit) { spkStop(tok); return; }
         if (ss.speaking || ss.pending) { idle = 0; spkPaint(spkFind(spk.key), true); return; }
         if (Date.now() - spk.started > 1500 && ++idle >= 2) spkStop(tok);
       }, 200);
@@ -653,7 +657,7 @@ function blockHTML(s, ws) {
       (nth > 1 ? '<span class="nth"><span class="pt">' + nth + '번째</span></span>' : '') + '</div>' +
       (speechOK ? '<button type="button" class="ibs spk" data-a="say" data-v="' + esc(w.term) + '" aria-label="단어 발음 듣기">' + ic('speaker', 18) + '</button>' : '') + '</div>' +
       '<span class="wmean">' + esc(w.meaning || '뜻 없음') + '</span>' +
-      (w.memo ? '<div class="row between" style="gap:8px"><span class="wmemo">' + esc(w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="color:var(--muted)" data-a="say" data-v="' + esc(w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 16) + '</button>' : '') + '</div>' : '') +
+      (w.memo ? '<div class="row between" style="gap:8px;margin-top:4px"><span class="wmemo">' + esc(w.memo) + '</span>' + (speechOK ? '<button type="button" class="ibs spk" style="width:32px;height:32px;margin:-7px -6px -7px 0;color:var(--muted)" data-a="say" data-v="' + esc(w.memo) + '" aria-label="예문 발음 듣기">' + ic('speaker', 16) + '</button>' : '') + '</div>' : '') +
       '</div>';
   });
   return h + '</div></div>';
@@ -790,7 +794,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.25</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.26</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +

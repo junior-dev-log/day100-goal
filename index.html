@@ -906,7 +906,7 @@ const DL_SORTS = [['latest', '최신순', '최근에 공부한 콘텐츠부터']
 function dlOptHTML(o, last) {
   const on = S.dlSort === o[0];
   return '<button type="button" class="dlopt' + (last ? ' last' : '') + (on ? ' on' : '') + '" role="radio" aria-checked="' + on + '" data-a="dlPick" data-v="' + o[0] + '">' +
-    '<span style="display:flex;align-items:baseline;gap:10px;min-width:0"><span style="flex:0 0 4.2em;font-size:16px;font-weight:600;white-space:nowrap">' + o[1] + '</span><span style="font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + o[2] + '</span></span>' +
+    '<span style="display:flex;align-items:baseline;gap:10px;flex:1 1 0%;min-width:0"><span style="flex:0 0 4.2em;font-size:16px;font-weight:600;white-space:nowrap">' + o[1] + '</span><span style="flex:1 1 0%;min-width:0;font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + o[2] + '</span></span>' +
     '<span class="dlradio" aria-hidden="true"><span></span></span></button>';
 }
 function dlOpenSheet() {

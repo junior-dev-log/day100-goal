@@ -186,7 +186,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .scard .seg{background:var(--bg);width:190px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .outline{display:flex;align-items:center;justify-content:center;gap:6px;height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-weight:500}
 /* tab bar */
-.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;z-index:40;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));padding:6px 8px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
+.tabbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;z-index:40;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));padding:6px 8px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
 .tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:54px;border:0;background:transparent;color:var(--muted);font-weight:500}
 .tabbar button span{font-size:12px}
 .tabbar button[aria-current="page"]{color:var(--ink);font-weight:700}
@@ -238,6 +238,75 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .authtabs button{flex:1;height:38px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:14px;font-weight:500}
 .authtabs button.on{background:var(--segOn);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
 
+
+.rvproto{display:flex;flex-direction:column;gap:6px;padding:10px 12px;margin:0 0 14px;border:1px dashed var(--line);border-radius:12px}
+.rvproto>span{font-size:11px;color:var(--muted);font-weight:600}
+.rvproto .seg button{height:34px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:13px;font-weight:500}
+.rvproto .seg button.on{background:var(--segOn);color:var(--ink);font-weight:700;box-shadow:var(--shadow)}
+.rvbox{background:var(--sub);border-radius:16px;padding:20px}
+.rvbig{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.rvsec{font-size:17px;font-weight:700}
+.rvline{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--text2)}
+.rvline b{color:var(--ink)}
+.rvcheck{width:40px;height:40px;border-radius:12px;background:var(--primaryBg);color:var(--primaryFg);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rvrow{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:13px 0;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink)}
+.rvbar{flex:1;height:4px;border-radius:99px;background:var(--cellOff);overflow:hidden}
+.rvseg{flex:1;display:flex;gap:3px;height:4px}
+.rvseg i{flex:1;min-width:0;border-radius:99px;background:var(--cellOff);transition:background .2s}
+.rvseg i.on{background:var(--ink)}
+.rvbar i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .2s}
+.rvcard{height:390px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:20px;padding:16px 18px 12px;background:var(--bg);box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:pointer}
+.rvsrc{flex-shrink:0;height:38px;font-size:13px;line-height:19px;color:var(--muted);text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.rvtagrow{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center}
+.rvmid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:8px 4px}
+.rvterm{font-size:32px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.rvmean{font-size:15px;color:var(--ink);line-height:1.5}
+.rvmemo{font-size:15px;color:var(--muted);line-height:1.5}
+.rvhint{font-size:14px;color:var(--muted)}
+.rvno,.rvyes{flex:1;height:58px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:14px;font-size:16px}
+.rvno{border:0;background:var(--accentSoft);color:var(--accent)}
+.rvyes{border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+.rvno small,.rvyes small{font-size:11px;font-weight:500;opacity:.75}
+.rvno,.rvyes{position:relative}
+.rvno > svg,.rvyes > svg{position:absolute;top:50%;margin-top:-8.5px}
+.rvno > svg{left:8px}
+.rvyes > svg{right:7px}
+.rvno .col,.rvyes .col{margin-top:0}
+.rvno,.rvyes{text-align:center}
+.rvno{padding-left:28px}
+.rvyes{padding-right:28px}
+.rvundo{display:flex;align-items:center;justify-content:center;gap:4px;margin:7px auto 0;border:0;background:transparent;color:var(--muted);font-size:13px;height:20px;padding:0}
+.rvundo:disabled{opacity:.4}
+.rvgoal button{height:34px;font-size:13px;padding:0}
+.rvbox{background:transparent;padding:6px 0 0}
+.rvbig{font-size:52px}
+.rvsec{font-size:16px}
+.rvrow{border-bottom:0;padding:12px 0}
+.rvrow .btn2{border:0;background:var(--accentSoft);color:var(--accent);height:34px;border-radius:999px;padding:0 14px}
+.rvline{border-bottom:0;padding:10px 0}
+.rvstart{display:flex;align-items:center;gap:2px;height:32px;padding:0 2px;border:0;background:none;color:var(--accent);font-size:15px;font-weight:700}
+.rvstart::after{content:'›';font-size:20px;line-height:1;margin-left:3px}
+
+.rvgoalbtn{display:flex;align-items:center;justify-content:flex-start;gap:4px;width:118px;height:36px;padding:0 12px 0 18px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;font-weight:600}
+.rvsheetback{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.4);display:flex;align-items:flex-end;justify-content:center}
+.rvsheet{scrollbar-width:none;-ms-overflow-style:none}.rvsheet::-webkit-scrollbar{display:none;width:0;height:0}
+.rvsheet{width:100%;max-width:430px;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:0 20px;box-shadow:var(--pop);animation:rvup .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes rvup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.rvsheet{animation:none}}
+.rvhead{position:sticky;top:0;z-index:2;background:var(--bg);margin:0 -20px;padding:10px 20px 0}
+.rvfoot{position:sticky;bottom:0;z-index:2;background:var(--bg);margin:8px -20px 0;padding:12px 20px calc(24px + env(safe-area-inset-bottom,0px));box-shadow:0 -10px 10px -4px var(--bg)}
+.rvgrip{width:36px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+.rvtrack{position:absolute;left:28px;right:28px;top:13px;height:2px;background:var(--line)}
+.rvtrack.on{right:auto;width:calc((100% - 56px) * .6667);background:var(--accent)}
+.rvnode{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--bg);border:2px solid var(--line);box-sizing:border-box}
+.rvnode.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.rvmemo2{display:inline-block;padding:4px 10px;border-radius:999px;background:var(--accentSoft);color:var(--accent);font-size:12px;font-weight:700;white-space:nowrap}
+.rvdot{width:7px;height:7px;border-radius:4px;border:0;padding:0;background:var(--line)}
+.rvdot.on{width:20px;background:var(--accent)}
+.rvtabs button{height:40px;font-size:13.5px;padding:0 2px;white-space:nowrap}
+.rvgoalbtn .rvgv{width:66px;text-align:left;white-space:nowrap;font-variant-numeric:tabular-nums}
+.rvgoalbtn > svg{margin-left:auto;flex-shrink:0}
+.rvgoal button.on{background:var(--segOn)}
 </style>
 </head>
 <body>
@@ -248,6 +317,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 <nav class="tabbar" aria-label="화면 이동" id="tabbar" style="display:none">
   <button type="button" data-a="tab" data-v="record" id="t-record"></button>
   <button type="button" data-a="tab" data-v="words" id="t-words"></button>
+  <button type="button" data-a="tab" data-v="review" id="t-review"></button>
   <button type="button" data-a="tab" data-v="settings" id="t-settings"></button>
 </nav>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -281,6 +351,7 @@ const ICONS = {
   settings:'<path d="M4 7h9M17 7h3M4 12h3M11 12h9M4 17h11M19 17h1"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="17" r="2"/>',
   dots:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  review:'<path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/>', check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><circle cx="12" cy="16.3" r="0.9" fill="currentColor" stroke="none"/>'
 };
 const ic = (n, s) => '<svg width="' + (s || 20) + '" height="' + (s || 20) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + ICONS[n] + '</svg>';
@@ -506,7 +577,7 @@ let D = derive();
 
 /* ---------- render: tab bar ---------- */
 function renderTabs() {
-  const tabs = [['record', 'pencil', '기록'], ['words', 'book', '단어장'], ['settings', 'settings', '설정']];
+  const tabs = [['record', 'pencil', '기록'], ['words', 'book', '단어장'], ['review', 'review', '복습'], ['settings', 'settings', '설정']];
   tabs.forEach(([k, icn, label]) => {
     const b = $('#t-' + k);
     b.innerHTML = ic(icn, 22) + '<span>' + label + '</span>';
@@ -799,7 +870,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.10.31</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.11.01</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
@@ -841,7 +912,8 @@ function render() {
   D = derive();
   renderTabs();
   const el = $('#screen');
-  el.innerHTML = S.tab === 'record' ? renderRecord() : S.tab === 'words' ? renderWords() : renderSettings();
+  el.innerHTML = S.tab === 'record' ? renderRecord() : S.tab === 'words' ? renderWords() : S.tab === 'review' ? renderReview() : renderSettings();
+  if (S.tab === 'review') rvBind();
 }
 function renderList() { D = derive(); const l = $('#list'); if (l) l.innerHTML = listHTML(); else render(); }
 
@@ -1225,6 +1297,325 @@ function pdfFromJpegs(jpgs, iw, ih) {
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('dlsheet')) dlCloseSheet(); });
 
+/* ===== 복습 탭 =====
+   단어장 화면·단어 기록은 건드리지 않음. 단어(sessions)는 읽기만 하고, 복습 기록은 users/{uid}/review/state 한 문서에만 따로 저장함. */
+const RV = { mode: 'A', run: null, a: {}, b: {}, noClick: false, day: '', done: 0, doneN: 0, cv: 'none', goal: 30 };
+const RV_PERSIST = !window.__RV_NOSAVE; /* 시안 파일에서만 저장을 끔(가짜 저장소) */
+const RVS = { uid: '', ref: null, unsub: null, loaded: false, failed: '', saveErr: false, busy: false, again: false, t: 0, hold: null };
+const RV_GOALS = [10, 20, 30, 50, 0]; /* 0 = 무제한 */
+const RV_INT = [3, 7, 14, 30]; /* 알아요 간격. 다시 볼래요(내일)와 겹치지 않게 첫 간격은 3일 (2026-10-28) */
+const nf = x => Number(x).toLocaleString('en-US');
+function rvWords() {
+  return Object.keys(D.byKey).map(k => {
+    const all = D.byKey[k], last = all[all.length - 1];
+    let meaning = '', memo = '';
+    for (let i = all.length - 1; i >= 0; i--) { if (!meaning && all[i].w.meaning) meaning = all[i].w.meaning; if (!memo && all[i].w.memo) memo = all[i].w.memo; }
+    return { k, term: String(last.w.term).trim(), meaning, memo, title: last.s.title, sids: all.map(x => x.s.id) };
+  });
+}
+function rvShuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function rvToday(ws) {
+  const T = today(), again = [], fresh = [], check = [];
+  ws.forEach(w => { const s = RV.a[w.k]; if (!s) fresh.push(w); else if (s.due <= T) (s.box < 0 ? again : check).push(w); });
+  /* 하루 목표만큼: 다시 볼 단어 → 잊지 않았는지 확인 → 새 단어 순서로 채움. 콘텐츠와 상관없이 전체 단어에서 */
+  /* 하루 양(N개)은 확인할 단어 + 새 단어로 채우고, 어제 '다시 볼래요'한 단어는 그 위에 모두 더함 */
+  const room = RV.goal ? Math.max(0, RV.goal - RV.doneN) : Infinity;
+  let left = room; const take = a => { const t = a.slice(0, Math.max(0, left)); left -= t.length; return t; };
+  const qa = again, qc = take(check), qf = take(rvShuffle(fresh)); /* 새 단어는 등록 순서가 아니라 무작위로 */
+  return { again: qa, check: qc, fresh: qf, freshAll: fresh.length, waiting: check.length + fresh.length - qc.length - qf.length };
+}
+function rvDaysTo(d) { const a = new Date(today() + 'T00:00:00'), b = new Date(d + 'T00:00:00'); return Math.round((b - a) / 86400000); }
+function rvDateText() { const d = new Date(); return (d.getMonth() + 1) + '월 ' + d.getDate() + '일 ' + '일월화수목금토'[d.getDay()] + '요일'; }
+function rvNextA(k, known) { const s = RV.a[k]; if (!known) return { box: -1, due: dstr(1) }; const box = s && s.box >= 0 ? Math.min(s.box + 1, RV_INT.length - 1) : 0; return { box, due: dstr(RV_INT[box]) }; }
+function rvProtoSeg() { return ''; } /* 시안 비교 칸은 뺌 (2026-10-25): A 오늘의 복습 + 최근 콘텐츠 한 칸으로 고정 */
+function rvHead(sub) {
+  return '<div class="row between pad top"><div class="row" style="align-items:baseline;gap:10px"><span class="htitle">복습</span><span style="font-size:13px;color:var(--muted)">' + sub + '</span></div>' + themeBtn() + '</div>';
+}
+/* 날이 바뀌면 '오늘 한 개수'를 0으로 (하루 양은 날마다 새로) */
+/* ----- 복습 기록 저장 (users/{uid}/review/state). sessions에는 쓰지 않음 -----
+   - 처음 불러오기가 끝나기 전에는 절대 쓰지 않음(저장된 기록을 빈 값으로 덮어쓰지 않도록)
+   - 불러오기에 실패하면(규칙 미설정·오프라인) 쓰지 않고, 이번 복습은 저장되지 않는다고 알림 */
+function rvRefresh() { if (S.tab === 'review' && !RV.run) render(); }
+function rvApply(d) {
+  const a = {};
+  if (Array.isArray(d.a)) d.a.forEach(x => { if (x && typeof x.k === 'string' && x.k && Number.isInteger(x.b) && x.b >= -1 && x.b < RV_INT.length && typeof x.d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(x.d)) a[x.k] = { box: x.b, due: x.d }; });
+  RV.a = a;
+  if (RV_GOALS.indexOf(d.goal) >= 0) RV.goal = d.goal;
+  RV.day = typeof d.day === 'string' ? d.day : '';
+  RV.done = Number.isInteger(d.done) && d.done > 0 ? d.done : 0;
+  RV.doneN = Number.isInteger(d.doneN) && d.doneN > 0 ? d.doneN : 0;
+  if (typeof d.t === 'number' && d.t > RVS.t) RVS.t = d.t;
+}
+function rvOnSnap(snap) {
+  const md = snap.metadata || {};
+  if (md.hasPendingWrites) return; /* 방금 내가 쓴 것의 메아리 */
+  if (md.fromCache && !snap.exists) return; /* 서버 확인 전의 빈 값으로는 시작하지 않음 */
+  let d = null; try { d = snap.exists ? snap.data() : null; } catch (e) { d = null; }
+  RVS.loaded = true; RVS.failed = '';
+  if (d && !RVS.busy && !(typeof d.t === 'number' && d.t < RVS.t)) { if (RV.run) RVS.hold = d; else rvApply(d); }
+  rvRefresh();
+}
+function rvSync() {
+  if (!RV_PERSIST || !S.user || RVS.uid === S.user.uid) return;
+  if (RVS.unsub) { try { RVS.unsub(); } catch (e) {} }
+  RV.a = {}; RV.b = {}; RV.run = null; RV.day = ''; RV.done = 0; RV.doneN = 0; RV.goal = 30; RV.goalOpen = false; RV.infoOpen = false;
+  const uid = S.user.uid;
+  Object.assign(RVS, { uid, ref: null, unsub: null, loaded: false, failed: '', saveErr: false, busy: false, again: false, t: 0, hold: null });
+  try {
+    RVS.ref = fdb.collection('users').doc(uid).collection('review').doc('state');
+    RVS.unsub = RVS.ref.onSnapshot(snap => { if (RVS.uid === uid) rvOnSnap(snap); }, err => { if (RVS.uid !== uid) return; RVS.failed = (err && err.code) || 'error'; RVS.ref = null; rvRefresh(); });
+  } catch (e) { RVS.failed = 'error'; RVS.ref = null; }
+}
+function rvPack() {
+  const a = []; Object.keys(RV.a).forEach(k => { const s = RV.a[k]; if (k && s) a.push({ k, b: s.box, d: s.due }); });
+  return { v: 1, a, goal: RV.goal, day: RV.day, done: RV.done, doneN: RV.doneN, t: (RVS.t = Math.max(Date.now(), RVS.t + 1)) };
+}
+function rvFlush() {
+  const uid = RVS.uid, ref = RVS.ref; RVS.busy = true;
+  let p; try { p = ref.set(rvPack()); } catch (e) { p = Promise.reject(e); }
+  Promise.resolve(p).then(() => { if (RVS.uid === uid) RVS.saveErr = false; }, () => { if (RVS.uid === uid) RVS.saveErr = true; }).then(() => {
+    if (RVS.uid !== uid) return;
+    RVS.busy = false;
+    if (RVS.again) { RVS.again = false; rvFlush(); } else rvRefresh();
+  });
+}
+function rvDirty() { if (!RV_PERSIST || !RVS.ref || !RVS.loaded) return; if (RVS.busy) { RVS.again = true; return; } rvFlush(); }
+function rvNote() {
+  const t = RVS.failed ? '복습 기록을 불러오지 못해서, 이번 복습은 저장되지 않아요.' : RVS.saveErr ? '복습 기록을 저장하지 못했어요. 연결을 확인해 주세요.' : '';
+  return t ? '<div style="margin:12px 20px 0;padding:10px 14px;border-radius:12px;background:var(--sub);font-size:13px;line-height:1.5;color:var(--muted)">' + t + '</div>' : '';
+}
+function rvRoll() { const T = today(); if (RV.day !== T) { RV.day = T; RV.done = 0; RV.doneN = 0; } }
+function renderReview() {
+  rvSync();
+  if (RV_PERSIST && S.user && !RVS.loaded && !RVS.failed) return rvHead(rvDateText()) + '<div class="empty"><div style="font-size:15px;color:var(--muted);margin-top:8px">불러오는 중이에요</div></div>';
+  if (!RV.run && RVS.hold && !RVS.busy) { const h = RVS.hold; RVS.hold = null; if (!(typeof h.t === 'number' && h.t < RVS.t)) rvApply(h); }
+  if (!RV.run) rvRoll();
+  if (RV.run) return RV.run.i >= RV.run.list.length ? rvDoneHTML() : rvCardHTML();
+  return rvNote() + rvHomeHTML();
+}
+function rvHomeHTML() {
+  const ws = rvWords();
+  if (!ws.length) return rvHead(rvDateText()) + rvProtoSeg() + '<div class="empty"><div class="ico">' + ic('review', 28) + '</div><div style="font-size:18px;font-weight:700;margin-top:8px">아직 복습할 단어가 없어요</div><div style="font-size:15px;line-height:1.55;color:var(--muted)">단어를 기록하기 시작하면<br>잊기 전에 여기서 다시 볼 수 있어요</div><button type="button" class="primary" style="width:auto;height:48px;padding:0 22px;margin-top:12px;font-size:15px" data-a="tab" data-v="record">첫 기록 남기기</button></div>';
+  return RV.mode === 'A' ? rvHomeA(ws) : rvHomeB(ws);
+}
+function rvGoalSeg() {
+  const mk = g => '<button type="button" data-a="rvGoal" data-v="' + g + '" class="' + (RV.goal === g ? 'on' : '') + '" aria-pressed="' + (RV.goal === g) + '">' + (g ? g + '개' : '무제한') + '</button>';
+  return '<div class="col" style="gap:6px;margin-bottom:14px"><span style="font-size:12px;color:var(--muted)">하루에 복습할 양 <span style="opacity:.8">· 콘텐츠와 상관없이 전체 단어에서</span></span><div class="seg rvgoal" style="grid-template-columns:repeat(5,minmax(0,1fr))">' + RV_GOALS.map(mk).join('') + '</div></div>';
+}
+/* 하루 양 고르기: 알약을 누르면 아래로 펼쳐지는 세로 목록 (콘텐츠 ⋯ 메뉴와 같은 모양) */
+function rvGoalMenu() {
+  const mk = g => { const on = RV.goal === g; return '<button type="button" data-a="rvGoal" data-v="' + g + '" aria-pressed="' + on + '" style="justify-content:space-between' + (on ? ';color:var(--accent);font-weight:700' : '') + '">' + (g ? g + '개' : '무제한') + (on ? ic('check', 17) : '') + '</button>'; };
+  return '<button type="button" aria-label="닫기" data-a="rvGoalOpen" style="position:fixed;inset:0;z-index:24;border:0;background:transparent;padding:0"></button>' +
+    '<div class="menu" style="top:42px;right:0;min-width:104px">' + RV_GOALS.map(mk).join('') + '</div>';
+}
+/* 복습 규칙: 아래에서 올라오는 시트. 시안 A(한 장) 확정 */
+function rvInfoVis(kind) {
+  const mini = (cls, ic1, b, s, ic2) => '<button type="button" class="' + cls + '" tabindex="-1" aria-hidden="true" style="pointer-events:none">' + (ic1 || '') + '<span class="col" style="gap:1px"><b>' + b + '</b><small>' + s + '</small></span>' + (ic2 || '') + '</button>';
+  if (kind === 'btns') return '<div class="row" style="gap:10px">' + mini('rvno', ic('chevLeft', 17), '다시 볼래요', '내일 다시') + mini('rvyes', '', '알아요', '3일 뒤 다시', ic('chevRight', 17)) + '</div>';
+  if (kind === 'line') {
+    const node = (d, on) => '<div class="col" style="align-items:center;gap:6px;position:relative;z-index:1;width:56px"><span class="rvnode' + (on ? ' on' : '') + '">' + (on ? ic('check', 14) : '') + '</span><span style="font-size:13px;font-weight:' + (on ? 700 : 500) + ';color:' + (on ? 'var(--accent)' : 'var(--text2)') + '">' + d + '일 뒤</span></div>';
+    return '<div style="position:relative;padding:0 0 0"><span class="rvtrack"></span><span class="rvtrack on"></span><div class="row between" style="align-items:flex-start;padding:0 0">' + node(3) + node(7) + node(14, 1) + node(30) + '</div>' +
+      '<div style="position:absolute;top:-30px;left:calc(28px + (100% - 56px) * 2 / 3);transform:translateX(-50%)"><span class="rvmemo2">여기서 외운 단어</span></div></div>';
+  }
+  if (kind === 'order') {
+    const row = (c, t, s) => '<div class="row" style="gap:10px;align-items:center"><i style="display:block;width:10px;height:10px;border-radius:50%;flex-shrink:0;background:' + c + '"></i><span style="font-size:15px;color:var(--ink);font-weight:600">' + t + '</span><span style="font-size:13px;color:var(--muted);margin-left:auto;text-align:right">' + s + '</span></div>';
+    return '<div class="col" style="gap:12px">' + row('var(--accent)', '어제 다시 볼래요 누른 단어', '모두 나와요') + row('color-mix(in srgb, var(--accent) 55%, var(--bg))', '복습할 날이 된 단어', '먼저 채워요') + row('color-mix(in srgb, var(--accent) 22%, var(--bg))', '새 단어', '남는 자리에') + '</div>';
+  }
+  return '';
+}
+function rvInfoHTML() {
+  const body = (t) => '<span style="font-size:15px;font-weight:700;color:var(--ink)">' + t + '</span>';
+  const nb = (t) => '<span style="white-space:nowrap">' + t + '</span>';
+  const p = (t) => '<div style="font-size:min(14px,calc((min(100vw,430px) - 40px) / 21.3));line-height:1.55;color:var(--text2);word-break:keep-all;text-wrap:pretty">' + t + '</div>';
+  const sec = (title, vis, note) => '<div class="col" style="gap:12px">' + body(title) + vis + (note ? (vis ? '<div style="margin-top:6px">' + p(note) + '</div>' : p(note)) : '') + '</div>';
+  const okBtn = (label) => '<div class="rvfoot"><button type="button" class="primary" data-a="rvInfo">' + label + '</button></div>';
+  const practice = '<div style="margin-top:-18px">' + p('최근 공부한 단어와 랜덤 콘텐츠는 연습이라 복습 일정에는 반영되지 않아요.') + '</div>';
+  const head = '<div class="rvhead"><div class="rvgrip"></div><div class="row between" style="align-items:center;margin:2px 0 16px"><span style="font-size:20px;font-weight:700;color:var(--ink)">복습은 이렇게 돌아가요</span><button type="button" class="ib" style="color:var(--muted);margin-right:-10px" data-a="rvInfo" aria-label="닫기">' + ic('x', 20) + '</button></div></div>';
+  let inner = '';
+  {
+    inner = '<div class="col" style="gap:32px">' +
+      sec('카드에서 고르면', rvInfoVis('btns'), '<div style="white-space:nowrap">다시 볼래요는 내일 다시 나오고 하루 양에는 안 세요.<br>알아요는 누를 때마다 다음 복습이 멀어져요.</div>') +
+      sec('[알아요] 이어서 누르면', '<div style="padding-top:28px">' + rvInfoVis('line') + '</div>', '세 번 연속 누르면 외운 단어가 돼요.<br>' + nb('중간에 [다시 볼래요] 누르면 처음부터예요.')) +
+      sec('오늘 나오는 단어', rvInfoVis('order'), '하루 양만큼, 위에서부터 이 순서로 채워요.') + practice + '</div>' + okBtn('알겠어요');
+  }
+  return '<div class="rvsheetback" data-a="rvInfo"><div class="rvsheet" data-keep="modal" data-a="">' + head + inner + '</div></div>';
+}
+function rvChip(l, c) { return '<span class="tag"><span class="pt">' + l + ' <b style="color:var(--accent)">' + nf(c) + '</b></span></span>'; }
+function rvHomeA(ws) {
+  const q = rvToday(ws), n = q.again.length + q.fresh.length + q.check.length;
+  let h = rvHead(rvDateText()) + rvProtoSeg() + '<div class="col pad" style="gap:32px;padding-top:4px;padding-bottom:24px">';
+  if (n) {
+    h += '<div class="rvbox"><div class="row between" style="align-items:center;gap:12px;margin-bottom:12px">' +
+      '<div class="col" style="gap:4px;min-width:0"><div style="font-size:14px;color:var(--text2)">오늘 복습할 단어</div><span class="row" style="align-items:baseline;gap:6px"><span class="rvbig">' + nf(n) + '</span><span style="font-size:17px;font-weight:600">개</span></span></div>' +
+      '<div class="col" style="align-items:flex-end;gap:10px;flex-shrink:0">' +
+      '<div style="position:relative"><button type="button" class="rvgoalbtn" data-a="rvGoalOpen" aria-expanded="' + !!RV.goalOpen + '"><span class="rvgv">하루 ' + (RV.goal ? RV.goal + '개' : '무제한') + '</span>' + ic(RV.goalOpen ? 'chevUp' : 'chevDown', 15) + '</button>' + (RV.goalOpen ? rvGoalMenu() : '') + '</div>' +
+      '<button type="button" class="rvstart" style="width:118px;justify-content:center;padding:0" data-a="rvStartA">오늘 복습 시작</button></div></div>' +
+      (q.again.length ? '<div class="tags" style="flex-wrap:wrap;gap:6px;margin:-2px 0 14px">' + (q.check.length + q.fresh.length ? rvChip('하루 양', q.check.length + q.fresh.length) : '') + rvChip('어제 다시 볼래요', q.again.length) + '</div>' : '') +
+      (RV.goal && q.check.length + q.fresh.length && q.check.length + q.fresh.length < RV.goal && !q.waiting && RV.doneN === 0 ? '<div style="font-size:13px;color:var(--muted);margin:-4px 0 12px">지금까지 기록한 단어가 모두 나와요</div>' : '') +
+      '</div>';
+  } else {
+    let nx0 = null; ws.forEach(w => { const st = RV.a[w.k]; if (st && st.due > today()) { const d = rvDaysTo(st.due); if (!nx0 || d < nx0.d) nx0 = { d, c: 1 }; else if (d === nx0.d) nx0.c++; } });
+    const agT = ws.filter(w => RV.a[w.k] && RV.a[w.k].box < 0 && RV.a[w.k].due <= dstr(1)).length; /* 내일 꼭 다시 나오는 단어(다시 볼래요로 넘긴 것)만 셈 */
+    h += '<div class="rvbox col" style="gap:14px"><div class="row between" style="gap:12px;align-items:center;flex-wrap:wrap"><div class="row" style="gap:14px;align-items:center;min-width:0;flex:1 1 ' + (RV.done ? 170 : 240) + 'px"><span class="rvcheck">' + ic('check', 20) + '</span><div class="col" style="gap:2px;min-width:0"><span style="font-size:18px;font-weight:700">' + (RV.done ? '오늘도 해냈어요' : '오늘은 복습할 단어가 없어요') + '</span><span style="font-size:13px;color:var(--muted)">' + (RV.done ? nf(RV.done) + '개 했어요' + (agT ? '<br>다시 볼래요 ' + nf(agT) + '개는 내일 만나요' : '') : (nx0 ? (nx0.d === 1 ? '내일' : nx0.d + '일 뒤') + ' ' + nf(nx0.c) + '개가 다시 나와요' : '새 단어를 기록하면 여기서 복습해요')) + '</span></div></div>' +
+      '<div style="position:relative;flex-shrink:0;margin-left:auto"><button type="button" class="rvgoalbtn" data-a="rvGoalOpen" aria-expanded="' + !!RV.goalOpen + '"><span class="rvgv">하루 ' + (RV.goal ? RV.goal + '개' : '무제한') + '</span>' + ic(RV.goalOpen ? 'chevUp' : 'chevDown', 15) + '</button>' + (RV.goalOpen ? rvGoalMenu() : '') + '</div></div>' +
+      (q.waiting ? '<button type="button" class="rvstart" style="align-self:flex-start" data-a="rvMore">' + nf(RV.goal ? Math.min(RV.goal, q.waiting) : q.waiting) + '개 더 복습</button>' : '') + '</div>';
+  }
+  h += rvContentHTML() + rvRoutesHTML() + rvMineHTML(ws);
+  const by = {};
+  ws.forEach(w => { const s = RV.a[w.k]; if (s && s.due > today()) { const d = rvDaysTo(s.due); by[d] = (by[d] || 0) + 1; } });
+  const rest = q.freshAll - q.fresh.length;
+  const days = Object.keys(by).map(Number).sort((a, b) => a - b);
+  h += '<div class="col" style="gap:0"><div class="row" style="gap:2px;align-items:center;height:23px"><span class="rvsec">다가오는 복습</span><button type="button" class="ibs" style="color:var(--muted)" data-a="rvInfo" aria-label="복습 규칙">' + ic('info', 18) + '</button></div>';
+  h += '<div style="border:1px solid var(--line);border-radius:14px;padding:14px 14px 12px;margin:6px 0 10px"><div style="font-size:14px;font-weight:600;margin-bottom:10px;line-height:1.5">[알아요] 3번 연속 누르면 외운 단어</div>' +
+    '<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 6px;font-size:13px;color:var(--text2)"><span style="white-space:nowrap">다시 나오는 날</span><span style="display:flex;align-items:center;gap:6px;white-space:nowrap"><b style="color:var(--accent)">3일 뒤</b><span style="color:var(--muted)">›</span><b style="color:var(--accent)">7일 뒤</b><span style="color:var(--muted)">›</span><b style="color:var(--accent)">14일 뒤</b></span><span style="background:var(--accent);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px;margin-left:auto;white-space:nowrap">외운 단어</span></div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-top:10px;line-height:1.5">중간에 [다시 볼래요] 누르면 처음부터예요.</div></div>';
+  if (days.length || rest) {
+    h += '<div style="border:1px solid var(--line);border-radius:14px;padding:2px 14px">';
+    let far = 0;
+    days.forEach(d => { if (d <= 7) h += '<div class="rvline" style="border-bottom:0"><span>' + (d === 1 ? '내일' : d + '일 뒤') + '</span><b>' + nf(by[d]) + '개</b></div>'; else far += by[d]; }); /* 7일 뒤까지만 날짜별, 그 뒤는 한 줄로 (2026-11-01) */
+    if (far) h += '<div class="rvline" style="border-bottom:0"><span>8일 이후</span><b>' + nf(far) + '개</b></div>';
+    if (rest) h += '<div class="rvline" style="border-bottom:0"><span>처음 볼 단어</span><b>' + nf(rest) + '개</b></div>';
+    h += '</div>';
+  }
+  h += '</div></div>' + (RV.infoOpen ? rvInfoHTML() : '');
+  return h;
+}
+function rvLastDay() { const ds = S.sessions.filter(s => s.words.length).map(s => s.date).sort(); return ds.length ? ds[ds.length - 1] : null; }
+function rvKeysOf(ss) { const ks = {}; ss.forEach(s => s.words.forEach(x => { const k = nkey(x.term); if (k) ks[k] = 1; })); return ks; }
+function rvRoutesHTML() {
+  const last = rvLastDay(); if (!last) return '';
+  const lastSs = S.sessions.filter(s => s.date === last && s.words.length), lastN = Object.keys(rvKeysOf(lastSs)).length;
+  const withW = S.sessions.filter(s => s.words.length).length;
+  const box = (t, sub, a) => '<button type="button" data-a="' + a + '" style="flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--bg);color:var(--ink);text-align:left"><span style="font-size:15px;font-weight:600">' + t + '</span><span style="font-size:12px;color:var(--muted)">' + sub + '</span></button>';
+  return '<div class="col" style="gap:12px"><span class="rvsec">다른 방법으로 복습</span><div class="row" style="gap:10px;align-items:stretch">' +
+    box('최근 공부한 단어', esc(kor(last)) + ' · ' + nf(lastN) + '개', 'rvStartL') +
+    box('랜덤 콘텐츠', '콘텐츠 하나 골라서', 'rvStartR') + '</div></div>';
+}
+function rvLatest() { return S.sessions.slice().sort((a, b) => b.date.localeCompare(a.date) || (b.createdAt || 0) - (a.createdAt || 0)).filter(s => s.words.length); }
+/* 내 단어: 전체 단어가 외운 단어 / 외우는 중 / 아직 안 봄으로 얼마나 나뉘는지 한 줄 막대로 */
+function rvMineHTML(ws) {
+  let known = 0, learning = 0;
+  ws.forEach(w => { const s = RV.a[w.k]; if (!s) return; if (s.box >= 2) known++; else learning++; });
+  const n = ws.length, fresh = n - known - learning, pc = c => (c / n * 100).toFixed(2) + '%';
+  const dot = (c, l, v) => '<span class="row" style="gap:6px;align-items:center;font-size:13px;color:var(--text2)"><i style="display:block;width:8px;height:8px;border-radius:50%;background:' + c + '"></i>' + l + ' <b style="color:var(--ink)">' + nf(v) + '</b></span>';
+  return '<div class="col" style="gap:12px"><span class="rvsec">내 단어 ' + nf(n) + '개</span>' +
+    '<div class="row" style="height:10px;border-radius:999px;overflow:hidden;background:var(--sub)"><i style="display:block;height:100%;width:' + pc(known) + ';background:var(--accent)"></i><i style="display:block;height:100%;width:' + pc(learning) + ';background:var(--accent);opacity:.35"></i></div>' +
+    '<div class="row" style="gap:16px;flex-wrap:wrap">' + dot('var(--accent)', '외운 단어', known) + dot('color-mix(in srgb, var(--accent) 35%, transparent)', '외우는 중', learning) + dot('var(--line)', '아직 안 봄', fresh) + '</div></div>';
+}
+function rvContentHTML() {
+  const ss = rvLatest(); if (!ss.length || RV.cv === 'none') return '';
+  if (RV.cv === 'recent') { const s = ss[0];
+    return '<div class="col" style="gap:8px"><div class="row between"><span class="rvsec">방금 공부한 콘텐츠</span><span style="font-size:12px;color:var(--muted)">가장 최근 기록 1개</span></div>' +
+      '<div class="rvbox row between" style="gap:12px;padding:16px"><span class="col" style="gap:3px;min-width:0"><span style="font-size:15px;font-weight:600">' + esc(s.title) + '</span><span style="font-size:12px;color:var(--muted)">' + esc(kor(s.date)) + ' · 단어 ' + s.words.length + '개</span></span>' +
+      '<button type="button" class="btn2" style="flex-shrink:0;font-weight:600" data-a="rvStartB" data-v="s:' + esc(s.id) + '">바로 복습</button></div></div>'; }
+  let h = '<div class="col"><div class="row between" style="margin-bottom:4px"><span class="rvsec">콘텐츠 골라 복습</span><span style="font-size:12px;color:var(--muted)">콘텐츠 ' + ss.length + '개</span></div>';
+  ss.forEach(s => { h += '<button type="button" class="rvrow" data-a="rvStartB" data-v="s:' + esc(s.id) + '"><span class="col" style="gap:3px;min-width:0;text-align:left"><span style="font-size:15px;font-weight:600">' + esc(s.title) + '</span><span style="font-size:12px;color:var(--muted)">' + esc(kor(s.date)) + ' · 단어 ' + s.words.length + '개</span></span>' + ic('chevRight', 18) + '</button>'; });
+  return h + '</div>';
+}
+function rvHomeB(ws) {
+  const again = ws.filter(w => RV.b[w.k] === 'again'), known = ws.filter(w => RV.b[w.k] === 'known').length, unseen = ws.length - again.length - known;
+  const todo = ws.filter(w => RV.b[w.k] !== 'known').length || ws.length;
+  const stat = (l, n, c) => '<div class="col" style="gap:4px"><span style="font-size:13px;color:var(--text2)">' + l + '</span><span style="font-size:26px;font-weight:700' + (c ? ';color:var(--accent)' : '') + '">' + n + '</span></div>';
+  let h = rvHead('모든 단어 <b style="color:var(--accent)">' + ws.length + '</b>개') + rvProtoSeg() + '<div class="col pad" style="gap:26px;padding-top:4px;padding-bottom:24px">' +
+    '<div class="rvbox col" style="gap:10px"><div style="display:grid;grid-template-columns:repeat(3,1fr);margin-bottom:6px">' + stat('다시 볼 단어', again.length, 1) + stat('외운 단어', known) + stat('아직 안 본 단어', unseen) + '</div>' +
+    '<button type="button" class="primary"' + (again.length ? '' : ' disabled style="opacity:.35"') + ' data-a="rvStartB" data-v="again">다시 볼 단어 복습 <span style="font-weight:500;opacity:.7">' + again.length + '개</span></button>' +
+    '<button type="button" class="outline" style="height:50px;font-size:15px;font-weight:600" data-a="rvStartB" data-v="all">전체 단어 복습 <span style="font-weight:500;color:var(--muted)">' + todo + '개</span></button>' +
+    '<div style="font-size:12px;color:var(--muted);text-align:center">전체 복습은 외운 단어를 빼고 섞어서 보여줘요.</div></div>';
+  h += rvContentHTML();
+  if (again.length) {
+    h += '<div class="col"><div class="row between" style="margin-bottom:4px"><span class="rvsec">다시 볼 단어</span><span style="font-size:12px;color:var(--muted)">' + again.length + '개</span></div>';
+    again.forEach(w => { h += '<div class="rvrow"><span class="col" style="gap:3px;min-width:0"><span style="font-size:15px;font-weight:600">' + esc(w.term) + '</span><span style="font-size:13px;color:var(--text2)">' + esc(w.meaning || '뜻 없음') + '</span></span><button type="button" class="ibs" style="color:var(--muted)" data-a="rvRemove" data-v="' + esc(w.k) + '" aria-label="다시 볼 단어에서 빼기">' + ic('x', 18) + '</button></div>'; });
+    h += '</div>';
+  }
+  return h + '</div>';
+}
+/* 진행 막대: 40개 이하면 한 칸씩 끊어서, 많으면(칸이 너무 가늘어져) 이어진 막대로 */
+function rvBar(done, n) {
+  if (n <= 40) { let h = '<div class="rvseg">'; for (let i = 0; i < n; i++) h += '<i' + (i < done ? ' class="on"' : '') + '></i>'; return h + '</div>'; }
+  return '<div class="rvbar"><i style="width:' + Math.round(done / n * 100) + '%"></i></div>';
+}
+function rvStart(title, list, mode) { if (!list.length) return; RV.run = { title, list, i: 0, flip: false, res: [], hist: [], mode }; render(); window.scrollTo(0, 0); }
+function rvCardHTML() {
+  const r = RV.run, w = r.list[r.i], n = r.list.length, A = r.mode === 'A';
+  let tag = '';
+  if (A) { const s = RV.a[w.k]; tag = s && s.box < 0 ? '어제 다시 볼래요' : ''; } /* 화면은 2가지로만: 하루 N개 / 어제 다시 볼래요 한 단어 */
+  const nx = A ? rvNextA(w.k, true) : null;
+  return '<div class="row between pad top"><button type="button" class="ib" data-a="rvClose" aria-label="복습 닫기">' + ic('x', 22) + '</button><span style="flex:1;min-width:0;padding:0 6px;font-size:16px;font-weight:700;text-align:center;line-height:1.35;overflow-wrap:anywhere">' + esc(r.title) + '</span><span style="width:44px;flex-shrink:0"></span></div>' +
+    '<div class="row pad" style="gap:12px;margin:6px 0 16px">' + rvBar(r.i, n) + '<span style="font-size:13px;color:var(--text2);font-weight:600;min-width:40px;text-align:right">' + nf(r.i) + ' / ' + nf(n) + '</span></div>' +
+    '<div class="pad"><div class="rvcard" id="rvcard" data-a="rvFlip"><div class="rvsrc">' + esc(w.title) + '</div>' +
+      /* 단어가 카드 세로 가운데에 오도록: 위 빈칸 · 단어 · 아래(소리·뜻) 를 1:auto:1로. 카드 높이는 뜻을 보이든 안 보이든 그대로 */
+      '<div class="rvmid" style="display:grid;grid-template-rows:minmax(0,1fr) auto minmax(0,1fr);justify-items:center;gap:0"><div></div><span class="rvterm">' + esc(w.term) + '</span>' +
+      '<div class="col rvlow" style="align-items:center;gap:10px;align-self:stretch;min-height:0;overflow-y:auto;padding-top:2px;width:100%"><button type="button" class="ibs" style="color:var(--text2);flex-shrink:0" data-a="say" data-v="' + esc(w.term) + '" aria-label="단어 발음 듣기">' + ic('speaker', 20) + '</button>' +
+      (r.flip ? '<div class="rvmean">' + esc(w.meaning || '뜻 없음') + '</div>' + (w.memo ? '<div class="rvmemo">' + esc(w.memo) + '</div>' : '') : '<div class="rvhint">뜻을 떠올려 보고, 눌러서 확인</div>') +
+    '</div></div><div class="rvtagrow">' + (tag ? '<span class="tag blue"><span class="pt">' + tag + '</span></span>' : (A ? '' : '<span style="font-size:12px;color:var(--muted)">연습이라 복습 일정에는 반영되지 않아요</span>')) + '</div></div></div>' +
+    '<div class="row pad" style="gap:10px;margin-top:16px"><button type="button" class="rvno" data-a="rvAns" data-v="0">' + ic('chevLeft', 17) + '<span class="col" style="gap:1px"><b>다시 볼래요</b>' + (A ? '<small>내일 다시</small>' : '') + '</span></button>' +
+      '<button type="button" class="rvyes" data-a="rvAns" data-v="1"><span class="col" style="gap:1px"><b>알아요</b>' + (A ? '<small>' + RV_INT[nx.box] + '일 뒤 다시</small>' : '') + '</span>' + ic('chevRight', 17) + '</button></div>' +
+    '<div style="font-size:13px;color:var(--text2);text-align:center;padding:10px 20px 0">카드를 왼쪽으로 밀면 다시 볼래요, 오른쪽으로 밀면 알아요</div>' +
+    '<button type="button" class="rvundo" data-a="rvUndo"' + (r.hist.length ? '' : ' disabled') + '>' + ic('repeat', 14) + '이전 단어</button>' +
+    '<div style="height:24px"></div>';
+}
+function rvDoneHTML() {
+  const r = RV.run, A = r.mode === 'A', no = r.res.filter(x => !x).length, yes = r.res.length - no;
+  return '<div class="row between pad top"><button type="button" class="ib" data-a="rvClose" aria-label="복습 닫기">' + ic('x', 22) + '</button><span style="flex:1;min-width:0;padding:0 6px;font-size:16px;font-weight:700;text-align:center;line-height:1.35;overflow-wrap:anywhere">' + esc(r.title) + '</span><span style="width:44px;flex-shrink:0"></span></div>' +
+    '<div class="row pad" style="gap:12px;margin:6px 0 16px">' + rvBar(r.list.length, r.list.length) + '<span style="font-size:13px;color:var(--text2);font-weight:600;min-width:40px;text-align:right">' + nf(r.list.length) + ' / ' + nf(r.list.length) + '</span></div>' +
+    '<div class="col pad" style="align-items:center;gap:0;padding-top:60px;padding-bottom:40px;text-align:center"><span style="font-size:22px;font-weight:700">' + (r.mode === 'A' ? '오늘도 해냈어요!' : '다 봤어요') + '</span><span style="font-size:13px;color:var(--muted);margin-top:26px">' + nf(r.list.length) + '개 중</span>' +
+      '<div class="row" style="gap:36px;margin:10px 0 0"><div class="col" style="gap:4px"><span style="font-size:28px;font-weight:700;color:var(--accent)">' + nf(no) + '</span><span style="font-size:13px;color:var(--text2)">다시 볼래요</span></div><div class="col" style="gap:4px"><span style="font-size:28px;font-weight:700">' + nf(yes) + '</span><span style="font-size:13px;color:var(--text2)">알아요</span></div></div>' +
+      (A && no ? '<span style="font-size:13px;color:var(--muted);margin-top:18px">다시 볼래요로 넘긴 단어는 내일 다시 나와요</span>' : '') + (A ? '' : '<span style="font-size:13px;color:var(--muted);margin-top:18px">연습이라 복습 일정에는 반영되지 않아요</span>') + '</div>' +
+    '<div class="col pad" style="gap:10px;padding-bottom:24px">' +
+      (A ? '<button type="button" class="primary" data-a="rvClose">완료</button>' :
+        (no ? '<button type="button" class="primary" data-a="rvAgain">다시 볼 단어만 한 번 더 <span style="font-weight:500;opacity:.7">' + no + '개</span></button>' : '') + '<button type="button" class="outline" style="height:50px;font-size:15px;font-weight:600" data-a="rvClose">완료</button>') +
+    '</div>';
+}
+function rvAnswer(known) {
+  const r = RV.run; if (!r || r.i >= r.list.length) return;
+  const w = r.list[r.i];
+  const isA = r.mode === 'A';
+  const sched = isA; /* 오늘의 복습만 다음 복습 날짜에 반영. 다른 방법(최근 공부한 단어·랜덤 콘텐츠·바로 복습)은 연습 */
+  const st = RV.a[w.k], cnt = isA && !(st && st.box < 0 && st.due <= today()); /* 다시 볼 단어는 하루 양에 세지 않음 */
+  r.hist.push({ k: w.k, a: RV.a[w.k], b: RV.b[w.k], isA, cnt });
+  if (isA) RV.done++;
+  if (cnt) RV.doneN++;
+  if (sched) RV.a[w.k] = rvNextA(w.k, known); else RV.b[w.k] = known ? 'known' : 'again';
+  r.res.push(known); r.i++; r.flip = false; if (sched) rvDirty(); render();
+}
+function rvAct(a, v) {
+  const ws = () => rvWords();
+  switch (a) {
+    case 'rvMode': RV.mode = v; RV.run = null; render(); break;
+    case 'rvCv': RV.cv = v; render(); break;
+    case 'rvStartL': { const last = rvLastDay(); if (!last) break; const ks = rvKeysOf(S.sessions.filter(s => s.date === last)); rvStart(kor(last) + '에 공부한 단어', ws().filter(w => ks[w.k]), 'L'); break; }
+    case 'rvStartR': { const ss = S.sessions.filter(s => s.words.length); if (!ss.length) break; const s = ss[Math.floor(Math.random() * ss.length)]; const ks = rvKeysOf([s]); rvStart(s.title, ws().filter(w => ks[w.k]), 'R'); break; }
+    case 'rvGoal': RV.goal = Number(v); RV.goalOpen = false; rvDirty(); render(); break;
+    case 'rvGoalOpen': RV.goalOpen = !RV.goalOpen; render(); break;
+    case 'rvInfo': RV.infoOpen = !RV.infoOpen; render(); break;
+    case 'rvMore': { /* 오늘 몫을 끝낸 뒤 더 하기: 하루 양 설정은 그대로, 같은 개수만큼 다음 단어를 이어서 */
+      const T = today(), all = ws(), due = all.filter(w => { const s = RV.a[w.k]; return s && s.box >= 0 && s.due <= T; }), fr = rvShuffle(all.filter(w => !RV.a[w.k])), more = due.concat(fr); /* 복습 날짜 된 단어 먼저 */
+      rvStart('오늘의 복습', rvShuffle(more.slice(0, RV.goal || more.length)), 'A'); break; }
+    case 'rvStartA': { const q = rvToday(ws()); rvStart('오늘의 복습', q.again.concat(rvShuffle(q.check.concat(q.fresh))), 'A'); break; }
+    case 'rvStartB': {
+      const all = ws();
+      if (v === 'again') rvStart('다시 볼 단어', rvShuffle(all.filter(w => RV.b[w.k] === 'again')), 'B');
+      else if (v === 'all') { const t = all.filter(w => RV.b[w.k] !== 'known'); rvStart('전체 단어', rvShuffle(t.length ? t : all), 'B'); }
+      else if (v && v.indexOf('s:') === 0) { const s = S.sessions.find(x => x.id === v.slice(2)); if (s) { const ks = {}; s.words.forEach(x => { ks[nkey(x.term)] = 1; }); rvStart(s.title, all.filter(w => ks[w.k]), 'B'); } }
+      break;
+    }
+    case 'rvFlip': if (RV.noClick || !RV.run) return; RV.run.flip = !RV.run.flip; render(); break;
+    case 'rvAns': rvAnswer(v === '1'); break;
+    case 'rvUndo': { const r = RV.run; if (!r || !r.hist.length) return; const h = r.hist.pop(); if (h.a) RV.a[h.k] = h.a; else delete RV.a[h.k]; if (h.b) RV.b[h.k] = h.b; else delete RV.b[h.k]; if (h.isA) RV.done--; if (h.cnt) RV.doneN--; r.res.pop(); r.i--; r.flip = false; if (h.isA) rvDirty(); render(); break; }
+    case 'rvClose': RV.run = null; render(); window.scrollTo(0, 0); break;
+    case 'rvAgain': { const r = RV.run; const again = r.list.filter((w, i) => !r.res[i]); rvStart('다시 볼 단어', rvShuffle(again), 'B'); break; }
+    case 'rvRemove': RV.b[v] = 'known'; render(); break;
+  }
+}
+function rvBind() {
+  const c = document.getElementById('rvcard'); if (!c) return;
+  let x0 = null, dx = 0, moved = false;
+  c.addEventListener('pointerdown', e => { if (e.target.closest('button')) return; x0 = e.clientX; dx = 0; moved = false; try { c.setPointerCapture(e.pointerId); } catch (er) {} c.style.transition = 'none'; });
+  c.addEventListener('pointermove', e => { if (x0 == null) return; dx = e.clientX - x0; if (Math.abs(dx) > 6) moved = true; c.style.transform = 'translateX(' + dx + 'px) rotate(' + (dx / 22) + 'deg)'; });
+  const end = () => { if (x0 == null) return; x0 = null; c.style.transition = 'transform .2s'; if (moved) { RV.noClick = true; setTimeout(() => { RV.noClick = false; }, 60); } if (Math.abs(dx) > 90) rvAnswer(dx > 0); else c.style.transform = ''; };
+  c.addEventListener('pointerup', end); c.addEventListener('pointercancel', end);
+}
+
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-a]');
   // 바깥을 누르면 달력·메뉴 닫기
@@ -1242,6 +1633,7 @@ document.addEventListener('click', e => {
   }
   if (!el) return;
   const a = el.dataset.a, v = el.dataset.v, ctx = el.dataset.ctx, rid = el.dataset.row, id = el.dataset.id;
+  if (a.indexOf('rv') === 0) { rvAct(a, v); return; }
   switch (a) {
     case 'tab': S.tab = v; S.picker = null; S.menuId = null; S.logoutAsk = false; render(); window.scrollTo(0, 0); break;
     case 'theme': prefs.theme = prefs.theme === 'dark' ? 'light' : 'dark'; savePrefs(); applyTheme(); render(); break;

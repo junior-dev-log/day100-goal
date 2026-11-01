@@ -255,10 +255,12 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .rvseg i{flex:1;min-width:0;border-radius:99px;background:var(--cellOff);transition:background .2s}
 .rvseg i.on{background:var(--ink)}
 .rvbar i{display:block;height:100%;background:var(--ink);border-radius:99px;transition:width .2s}
-.rvcard{height:390px;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:20px;padding:16px 18px 12px;background:var(--bg);box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:pointer}
+.rvcard{--rvh:clamp(290px,calc(100vh - 430px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)),390px);height:var(--rvh);display:flex;flex-direction:column;border:1px solid var(--line);border-radius:20px;padding:16px 18px 12px;background:var(--bg);box-shadow:var(--shadow);touch-action:pan-y;user-select:none;-webkit-user-select:none;cursor:pointer}
 .rvsrc{flex-shrink:0;height:38px;font-size:13px;line-height:19px;color:var(--muted);text-align:center;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
 .rvtagrow{flex-shrink:0;height:30px;display:flex;align-items:center;justify-content:center}
 .rvmid{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:8px 4px}
+@supports (height:100dvh){.rvcard{--rvh:clamp(290px,calc(100dvh - 430px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)),390px)}}
+.rvmid{padding-bottom:clamp(8px,calc((var(--rvh) - 300px)*1.12),56px)}
 .rvterm{font-size:32px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
 .rvmean{font-size:15px;color:var(--ink);line-height:1.5}
 .rvmemo{font-size:15px;color:var(--muted);line-height:1.5}
@@ -275,7 +277,7 @@ input[type=search]::-webkit-search-cancel-button{-webkit-appearance:none;appeara
 .rvno,.rvyes{text-align:center}
 .rvno{padding-left:28px}
 .rvyes{padding-right:28px}
-.rvundo{display:flex;align-items:center;justify-content:center;gap:4px;margin:7px auto 0;border:0;background:transparent;color:var(--muted);font-size:13px;height:20px;padding:0}
+.rvundo{display:flex;align-items:center;justify-content:center;gap:4px;margin:5px auto 0;border:0;background:transparent;color:var(--muted);font-size:13px;height:20px;padding:0}
 .rvundo:disabled{opacity:.4}
 .rvgoal button{height:34px;font-size:13px;padding:0}
 .rvbox{background:transparent;padding:6px 0 0}
@@ -870,7 +872,7 @@ function renderSettings() {
         '<span style="display:flex;align-items:center;min-height:40px;font-size:14px;color:var(--ink)">' + esc(S.user && S.user.email || 'Google 계정') + '</span>' +
         '<button type="button" class="btn2" data-a="askSignout">로그아웃</button></div>') +
     '</div>' +
-    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.11.01</span></div>' +
+    '<div class="col" style="align-items:center;gap:2px;padding-top:8px"><span style="font-size:13px;font-weight:700;color:var(--text2)">DAY100 GOAL <span style="font-weight:500;color:var(--muted)">&nbsp;&nbsp;·&nbsp;&nbsp;100 &gt; 평생</span></span><span style="font-size:11px;color:var(--muted)">버전 2026.11.01.2</span></div>' +
     (S.voiceInfoOpen ? '<div class="modalback" data-a="closeVoiceInfo">' +
       '<div class="modalcard vinfo" data-keep="modal" data-a="">' +
       '<button type="button" class="ib vinfo-x" data-a="closeVoiceInfo" aria-label="닫기">' + ic('x', 20) + '</button>' +
